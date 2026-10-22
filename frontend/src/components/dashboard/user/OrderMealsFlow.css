@@ -1,0 +1,774 @@
+/* OrderMealsFlow.css - Complete Rewrite with Exact Class Names */
+
+/* ============================================
+   CSS Variables
+   ============================================ */
+:root {
+  --primary-orange: #f26522;
+  --primary-orange-hover: #d4541a;
+  --light-orange-bg: #fff8f5;
+  --light-orange-bg-2: #fff3e8;
+  --grey-inactive: #adb5bd;
+  --grey-light: #f1f3f5;
+  --dark-text: #2b3674;
+  --grey-text: #555;
+  --grey-text-light: #888;
+  --border-color: #e9ecef;
+  --border-color-light: #dee2e6;
+}
+
+/* ============================================
+   Overall Order Flow Container
+   ============================================ */
+.order-flow-container {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 860px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   Header Navigation with Back Button
+   ============================================ */
+.order-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 2px solid var(--primary-orange);
+  color: var(--primary-orange);
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn::before {
+  /* content: '←'; */
+  font-size: 16px;
+}
+
+.back-btn:hover {
+  background: var(--primary-orange);
+  color: white;
+}
+
+.order-header-nav h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin: 0;
+}
+
+/* ============================================
+   Step Indicator
+   ============================================ */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.step-indicator .step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
+  height: 44px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: var(--grey-light);
+  color: var(--grey-inactive);
+  position: relative;
+}
+
+.step-indicator .step::before {
+  content: '';
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--grey-inactive);
+  transition: all 0.3s ease;
+}
+
+.step-indicator .step:nth-child(1)::before {
+  content: '1';
+}
+
+.step-indicator .step:nth-child(2)::before {
+  content: '2';
+}
+
+.step-indicator .step:nth-child(3)::before {
+  content: '3';
+}
+
+/* Inactive step */
+.step-indicator .step:not(.active):not(.completed) {
+  background: var(--grey-light);
+  color: var(--grey-inactive);
+}
+
+.step-indicator .step:not(.active):not(.completed)::before {
+  background: white;
+  color: var(--grey-inactive);
+}
+
+/* Active step */
+.step-indicator .step.active {
+  background: var(--primary-orange);
+  color: white;
+}
+
+.step-indicator .step.active::before {
+  background: white;
+  color: var(--primary-orange);
+}
+
+/* Completed step - same as active */
+.step-indicator .step.completed {
+  background: var(--primary-orange);
+  color: white;
+}
+
+.step-indicator .step.completed::before {
+  background: white;
+  color: var(--primary-orange);
+}
+
+/* ============================================
+   Step Content Area
+   ============================================ */
+.step-content h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin: 0 0 25px 0;
+  text-align: center;
+}
+
+/* ============================================
+   Plan Selection Grid
+   ============================================ */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px 20px;
+  border: 2px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(242, 101, 34, 0.2);
+}
+
+.plan-card.selected {
+  border-color: var(--primary-orange);
+  background: var(--light-orange-bg);
+  box-shadow: 0 8px 25px rgba(242, 101, 34, 0.3);
+}
+
+.plan-card strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.plan-card span {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-orange);
+}
+
+/* Duration text */
+.plan-card::after {
+  content: attr(data-duration);
+  font-size: 12px;
+  color: var(--grey-inactive);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ============================================
+   Start Date Input
+   ============================================ */
+.input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--grey-inactive);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.date-input {
+  width: 100%;
+  height: 50px;
+  border: 1.5px solid var(--border-color-light);
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.date-input:focus {
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.1);
+}
+
+/* ============================================
+   Primary Action Buttons
+   ============================================ */
+.primary-order-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--primary-orange);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 20px;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.primary-order-btn:hover {
+  filter: brightness(0.92);
+}
+
+.primary-order-btn:disabled {
+  background: var(--grey-inactive);
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* btnPulse animation for confirm and pay button */
+@keyframes btnPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(242, 101, 34, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(242, 101, 34, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(242, 101, 34, 0);
+  }
+}
+
+/* ============================================
+   Weekly Menu Day Cards Grid
+   ============================================ */
+.weekly-days-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.day-card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  border: 1.5px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day-card .day-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.day-card .day-menu {
+  font-size: 11px;
+  color: var(--grey-inactive);
+  margin-top: 4px;
+}
+
+.day-card.selected {
+  background: var(--light-orange-bg);
+  border-color: #f59e0b;
+}
+
+.day-card.selected .day-name {
+  color: var(--primary-orange);
+}
+
+/* ============================================
+   Menu Detail Card
+   ============================================ */
+.menu-detail-card {
+  background: white;
+  border-radius: 12px;
+  border: 2px solid var(--primary-orange);
+  padding: 20px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.menu-detail-card h4 {
+  margin: 0 0 15px 0;
+  color: var(--primary-orange);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-item-row {
+  margin-bottom: 14px;
+}
+
+.menu-item-row .menu-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark-text);
+}
+
+.menu-item-row .menu-value {
+  font-size: 14px;
+  color: var(--grey-text);
+  margin-top: 4px;
+}
+
+/* ============================================
+   Alter Main Subji Select Dropdown
+   ============================================ */
+.form-input {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid var(--border-color-light);
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--primary-orange);
+  box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.1);
+}
+
+/* ============================================
+   Payment Method Section
+   ============================================ */
+.payment-options {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pay-option {
+  flex: 1;
+  height: 72px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pay-option:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pay-option.active {
+  border-color: var(--primary-orange);
+  background: var(--light-orange-bg);
+}
+
+.pay-option input[type="radio"] {
+  display: none;
+}
+
+/* ============================================
+   Order Summary Card
+   ============================================ */
+.order-summary {
+  background: var(--light-orange-bg);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-orange);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.order-summary h4 {
+  margin: 0 0 18px 0;
+  font-size: 1.1rem;
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #ffe8d6;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row .summary-label {
+  font-size: 13px;
+  color: var(--grey-text-light);
+}
+
+.summary-row .summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+/* ============================================
+   Total Payable Box
+   ============================================ */
+.total-box {
+  background: var(--light-orange-bg-2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-orange);
+  margin-bottom: 20px;
+}
+
+/* ============================================
+   Kitchen Poster Image Wrapper (Vendor Card)
+   ============================================ */
+.kitchen-image-wrapper {
+  width: 100% !important;
+  height: 220px !important;
+  overflow: hidden !important;
+  border-radius: 12px 12px 0 0 !important;
+  position: relative !important;
+}
+
+.kitchen-image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+}
+
+/* ============================================
+   Modal Overlay
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+/* ============================================
+   QR Modal
+   ============================================ */
+.qr-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.qr-modal h2 {
+  margin: 0 0 25px 0;
+  font-size: 1.5rem;
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  border: 3px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  background: white;
+}
+
+.qr-amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-orange);
+  margin: 0 0 10px 0;
+}
+
+.qr-instruction {
+  color: var(--grey-text);
+  font-size: 14px;
+  margin: 0 0 25px 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.modal-actions .btn-secondary {
+  flex: 1;
+  padding: 14px 24px;
+  background: white;
+  color: var(--grey-text);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions .btn-secondary:hover {
+  border-color: var(--grey-text);
+  color: var(--dark-text);
+}
+
+.modal-actions .btn-primary {
+  flex: 1;
+  padding: 14px 24px;
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions .btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+/* ============================================
+   Closed Kitchen Popup
+   ============================================ */
+.closed-kitchen-popup {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: popupSlideIn 0.3s ease;
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.closed-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.closed-kitchen-popup h2 {
+  color: #ef4444;
+  margin: 0 0 15px 0;
+  font-size: 24px;
+}
+
+.closed-kitchen-popup p {
+  color: var(--grey-text);
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+}
+
+.closed-info {
+  background: #fef3c7;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.closed-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.closed-apology {
+  color: var(--grey-inactive) !important;
+  font-size: 13px !important;
+  font-style: italic;
+  margin-bottom: 20px !important;
+}
+
+/* ============================================
+   Responsive Design - Mobile (< 480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .order-flow-container {
+    padding: 16px;
+  }
+
+  .step-indicator {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .step-indicator .step {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-days-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .payment-options {
+    flex-direction: column;
+  }
+
+  .primary-order-btn {
+    width: 100%;
+  }
+
+  .order-header-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .order-header-nav h2 {
+    font-size: 1.2rem;
+  }
+
+  .step-content {
+    padding: 20px 15px;
+  }
+
+  .step-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .qr-modal {
+    padding: 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions .btn-secondary,
+  .modal-actions .btn-primary {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   Responsive Design - Tablet (481px - 768px)
+   ============================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .plan-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .weekly-days-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+

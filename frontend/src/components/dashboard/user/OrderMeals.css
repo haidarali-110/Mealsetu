@@ -1,0 +1,335 @@
+/* src/components/dashboard/user/OrderMeals.css */
+
+/* 1. The Card Container */
+.tiffing-card {
+  background: white;
+  border-radius: 24px;
+  /* Modern Squircle Shape */
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 100%;
+  /* Fills the grid cell perfectly */
+}
+
+.tiffing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(242, 101, 34, 0.15);
+  border-color: var(--primary-orange);
+}
+
+/* 2. Kitchen Image (Fixed Height) */
+.kitchen-image-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 220px !important;
+  overflow: hidden !important;
+  border-radius: 12px 12px 0 0 !important;
+  background-color: #f5f5f5;
+}
+
+.kitchen-image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  transition: transform 0.4s ease;
+}
+
+.kitchen-image-wrapper:hover img {
+  transform: scale(1.06);
+}
+
+/* Floating Rating Badge */
+.rating-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: white;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2b3674;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* "New" variant — green badge when no reviews yet */
+.rating-badge-new {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+/* 3. Card Body */
+.card-details {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.vendor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.vendor-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.vendor-type {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.fssai-pill {
+  font-size: 10px;
+  background: #f0fdf4;
+  color: #16a34a;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: 700;
+}
+
+/* Review Link */
+.view-reviews-link {
+  background: none;
+  border: none;
+  color: var(--primary-orange);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  text-decoration: underline;
+  width: fit-content;
+}
+
+/* 4. Info Grid (Days/Time) */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  margin: 8px 0;
+}
+
+.info-item span {
+  display: block;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.info-item strong {
+  font-size: 13px;
+  color: #334155;
+}
+
+/* 5. Price & Button Footer */
+.price-section {
+  margin-top: auto;
+  /* Pushes to bottom */
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-text {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--primary-orange);
+}
+
+.price-text small {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.modern-order-btn {
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(242, 101, 34, 0.2);
+}
+
+.modern-order-btn:hover {
+  background: #d4541a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(242, 101, 34, 0.3);
+}
+
+.write-review-btn-link {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.write-review-btn-link:hover {
+  text-decoration: underline;
+  color: #64748b;
+}
+
+/* Kitchen Closed Styles */
+.kitchen-closed {
+  opacity: 0.85;
+  border-color: #e2e8f0;
+}
+
+.kitchen-closed:hover {
+  transform: none;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #e2e8f0;
+}
+
+.kitchen-closed-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.closed-badge {
+  background: #ef4444;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+}
+
+.kitchen-closed-btn {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+.kitchen-closed-btn:hover {
+  transform: none !important;
+  background: #94a3b8 !important;
+}
+
+/* Closed Kitchen Popup Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.closed-kitchen-popup {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: popupSlideIn 0.3s ease;
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.closed-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.closed-kitchen-popup h2 {
+  color: #ef4444;
+  margin: 0 0 15px 0;
+  font-size: 24px;
+}
+
+.closed-kitchen-popup p {
+  color: #64748b;
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+}
+
+.closed-info {
+  background: #fef3c7;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.closed-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.closed-apology {
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+  font-style: italic;
+  margin-bottom: 20px !important;
+}
+
+/* Mobile Responsive - Image wrapper height for small screens */
+@media (max-width: 480px) {
+  .kitchen-image-wrapper {
+    height: 220px !important;
+  }
+}

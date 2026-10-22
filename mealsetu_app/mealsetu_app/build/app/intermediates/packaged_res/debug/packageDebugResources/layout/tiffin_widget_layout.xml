@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+  android:background="@drawable/tiffin_widget_background"
+    android:padding="14dp"
+    android:gravity="center_vertical">
+  <!-- android:background="@android:color/white" -->
+    <!-- Row 1: Brand + Status -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="MealSetu"
+            android:textSize="11sp"
+            android:textColor="#F26522"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/widget_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active"
+            android:textSize="10sp"
+            android:textColor="#22C55E"/>
+
+    </LinearLayout>
+
+    <!-- Divider -->
+    <!-- <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#33F26522"
+        android:layout_marginTop="7dp"
+        android:layout_marginBottom="7dp"/> -->
+        <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="#33F26522"
+    android:layout_marginTop="7dp"
+    android:layout_marginBottom="7dp"/>
+
+    <!-- Kitchen name + Time -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_vendor_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Open app to set up"
+            android:textSize="14sp"
+            android:textColor="#1A1A2E"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/widget_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="10sp"
+            android:textColor="#6B7280"/>
+
+    </LinearLayout>
+
+    <!-- Menu -->
+    <TextView
+        android:id="@+id/widget_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Today's tiffin info appears here"
+        android:textSize="11sp"
+        android:textColor="#6B7280"
+        android:ellipsize="end"
+        android:maxLines="2"/>
+
+    <!-- Tap hint -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Tap to open MealSetu"
+        android:textSize="9sp"
+        android:textColor="#BFF26522"/>
+
+</LinearLayout>

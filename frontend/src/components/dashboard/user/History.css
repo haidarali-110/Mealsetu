@@ -1,0 +1,120 @@
+.history-card {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.history-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* ===== TABLE WRAPPER — enables horizontal scroll on mobile ===== */
+.history-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 480px;
+  /* prevents squishing on small screens */
+  border-collapse: collapse;
+}
+
+.history-table th {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 2px solid #eef2f6;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.history-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.status-paid {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.status-failed {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.download-btn {
+  background: #f26522;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.download-btn:hover {
+  background: #d4541a;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .history-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .history-card h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+
+  .download-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}

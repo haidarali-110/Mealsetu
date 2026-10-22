@@ -1,0 +1,84 @@
+.admin-sidebar {
+  width: 220px;
+  min-width: 220px;
+  min-height: 100vh;
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transition: left 0.3s ease;
+}
+
+.admin-sidebar-logo {
+  padding: 24px 20px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #60a5fa;
+  border-bottom: 1px solid #1e293b;
+  letter-spacing: -0.3px;
+}
+
+.admin-nav {
+  flex: 1;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 13px 20px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.admin-nav-item:hover {
+  background: #1e293b;
+  color: white;
+}
+
+.admin-nav-item.active {
+  border-left: 3px solid #f26522;
+  background: #1e293b;
+  color: white;
+  font-weight: 600;
+}
+
+.admin-sidebar-logout {
+  padding: 20px;
+  border-top: 1px solid #1e293b;
+  cursor: pointer;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.admin-sidebar-logout:hover {
+  background: #1e293b;
+}
+
+/* ===== MOBILE DRAWER ===== */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    left: -230px;
+    top: 0;
+    height: 100vh;
+    box-shadow: none;
+    z-index: 1000;
+  }
+
+  .admin-sidebar.open {
+    left: 0;
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+  }
+}

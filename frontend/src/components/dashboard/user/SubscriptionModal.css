@@ -1,0 +1,389 @@
+/* Subscribe Plan Modal Styles */
+
+/* Modal Overlay */
+.subscribe-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: modalFadeIn 200ms ease-out;
+}
+
+/* Modal Fade In Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Card */
+.subscribe-modal-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 560px;
+  width: 90%;
+  padding: 32px;
+  position: relative;
+  animation: modalScaleIn 200ms ease-out;
+}
+
+@keyframes modalScaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.subscribe-modal-header {
+  margin-bottom: 24px;
+}
+
+.subscribe-modal-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.subscribe-modal-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Close Button */
+.subscribe-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #64748b;
+  transition: background-color 0.2s;
+}
+
+.subscribe-modal-close:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Plan Selection Grid */
+.plan-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Plan Card */
+.plan-card-option {
+  background: #f8fafc;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+}
+
+.plan-card-option:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.plan-card-option.selected {
+  border-color: #f26522;
+  background: #fff5f0;
+}
+
+/* Selected Check Mark */
+.plan-card-option.selected::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: #f26522;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-card-option.selected::before {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.plan-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.plan-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #f26522;
+  margin: 0 0 4px 0;
+}
+
+.plan-duration {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.plan-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-benefits li {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-benefits li::before {
+  content: '✓';
+  color: #22c55e;
+  font-weight: bold;
+}
+
+/* Most Popular Badge */
+.plan-card-option.monthly-plan {
+  position: relative;
+}
+
+.most-popular-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: #f26522;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Payment Method Section */
+.payment-method-section {
+  margin-top: 16px;
+}
+
+.payment-method-heading {
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.payment-method-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.payment-method-btn {
+  flex: 1;
+  height: 44px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.payment-method-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.payment-method-btn.selected {
+  border-color: #f26522;
+  background: #fff5f0;
+  color: #f26522;
+  font-weight: 600;
+}
+
+/* Order Summary */
+.order-summary-box {
+  background: #fff5f0;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.order-summary-placeholder {
+  color: #94a3b8;
+}
+
+.order-summary-content {
+  color: #475569;
+}
+
+.order-summary-content strong {
+  color: #f26522;
+}
+
+/* Button Row */
+.subscribe-modal-button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.btn-cancel {
+  background: white;
+  border: 2px solid #f26522;
+  color: #f26522;
+  border-radius: 12px;
+  height: 44px;
+  min-width: 120px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #fff5f0;
+}
+
+.btn-confirm-subscribe {
+  flex: 1;
+  background: #f26522;
+  border: none;
+  color: white;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s;
+  margin-left: 12px;
+}
+
+.btn-confirm-subscribe:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.btn-confirm-subscribe:disabled,
+.btn-confirm-subscribe.disabled {
+  background: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+}
+
+/* Success Toast */
+.success-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #22c55e;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  z-index: 2000;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 480px) {
+  .subscribe-modal-card {
+    padding: 20px;
+  }
+
+  .plan-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-method-buttons {
+    flex-direction: column;
+  }
+
+  .subscribe-modal-button-row {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel {
+    width: 100%;
+    min-width: unset;
+    margin-left: 0;
+    margin-top: 12px;
+  }
+
+  .btn-confirm-subscribe {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .subscribe-modal-title {
+    font-size: 20px;
+  }
+
+  .plan-price {
+    font-size: 22px;
+  }
+}
+

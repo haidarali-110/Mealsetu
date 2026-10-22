@@ -1,0 +1,88 @@
+.customer-management {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h3 {
+  margin: 0;
+}
+
+.total-badge {
+  background: #fff3ed;
+  color: #f26522;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customers-table th,
+.customers-table td {
+  padding: 15px 10px;
+  text-align: left;
+}
+
+.customers-table th {
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+}
+
+.customers-table td {
+  border-bottom: 1px solid #f8fafc;
+}
+
+.customer-name {
+  font-weight: bold;
+}
+
+.customer-pref {
+  font-size: 11px;
+  color: #a3aed0;
+}
+
+.plan-badge {
+  background: #f4f7fe;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.status-badge.expiring-in-3d {
+  background: #fef3c7;
+  color: #f26522;
+  border-color: #f26522;
+}
+
+.status-badge.expired {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #ef4444;
+}

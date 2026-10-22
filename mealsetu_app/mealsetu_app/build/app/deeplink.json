@@ -1,0 +1,1 @@
+{"applicationId":"com.mealsetu.mealsetu_app","deeplinkingFlagEnabled":false,"deeplinks":[{"scheme":"razorpay","host":"com.mealsetu.mealsetu_app","path":".*","intentFilterCheck":{"hasAutoVerify":false,"hasActionView":true,"hasDefaultCategory":true,"hasBrowsableCategory":true}}]}

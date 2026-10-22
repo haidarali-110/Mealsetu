@@ -1,0 +1,5 @@
+.env
+coverage/
+test-report.txt
+.jest-cache/
+firebase-service-account.json

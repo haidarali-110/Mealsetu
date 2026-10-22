@@ -1,0 +1,75 @@
+.compliance {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.compliance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.compliance-header h3 {
+  color: #2b3674;
+}
+
+.approved-badge {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  border: 1px solid #16a34a;
+}
+
+.pending-badge {
+  background: #fef2f2;
+  color: #ef4444;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.document-upload {
+  border: 2px dashed #ddd;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.document-upload p {
+  margin-bottom: 10px;
+}
+
+.document-upload input {
+  width: 100%;
+}
+
+.file-selected {
+  color: #16a34a;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.submit-btn {
+  background: #f26522;
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 20px;
+  width: 200px;
+  justify-content: center;
+}

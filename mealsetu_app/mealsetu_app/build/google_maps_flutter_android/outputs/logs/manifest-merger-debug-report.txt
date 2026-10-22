@@ -1,0 +1,25 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:1:1-6:12
+	package
+		ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:2:3-42
+		INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:1:11-69
+application
+ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:3:3-5:17
+uses-library#org.apache.http.legacy
+ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:4:5-83
+	android:required
+		ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:4:57-81
+	android:name
+		ADDED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml:4:19-56
+uses-sdk
+INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\uvesh\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.19.12\android\src\main\AndroidManifest.xml

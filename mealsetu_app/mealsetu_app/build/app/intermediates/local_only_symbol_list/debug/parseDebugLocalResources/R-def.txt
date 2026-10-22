@@ -1,0 +1,24 @@
+R_DEF: Internal format may change without notice
+local
+color orange
+color white
+drawable launch_background
+drawable tiffin_widget_background
+drawable widget_background
+id widget_menu
+id widget_root
+id widget_status
+id widget_time
+id widget_vendor_name
+layout tiffin_widget_layout
+mipmap ic_launcher
+string gcm_defaultSenderId
+string google_api_key
+string google_app_id
+string google_crash_reporting_api_key
+string google_storage_bucket
+string project_id
+string widget_description
+style LaunchTheme
+style NormalTheme
+xml tiffin_widget_info

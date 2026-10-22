@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($jarExe = \\(Get-Command java -ErrorAction SilentlyContinue\\).Source; if \\($jarExe\\) { $jarDir = Split-Path $jarExe; $jar = Join-Path $jarDir \"jar.exe\"; Write-Host \"jar: $jar\"; & $jar tf \"$env:TEMP\\\\rzp_check\\\\classes.jar\" 2>&1 | Select-String \"razorpay|Payment\" | Select-Object -First 20 })"
+    ]
+  }
+}

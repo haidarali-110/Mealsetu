@@ -1,0 +1,13 @@
+
+> mealsetu@0.0.0 build
+> vite build ; status=$?; echo EXIT:$status; tail 30 buildlog.txt; exit $status
+
+[36mvite v7.3.2 [32mbuilding client environment for production...[36m[39m
+[32m✓[39m 0 modules transformed.
+[31m✗[39m Build failed in 16ms
+[31merror during build:
+[31mCould not resolve entry module ";/index.html".[31m
+    at getRollupError (file:///d:/moin/mealsetu_project/frontend/node_modules/rollup/dist/es/shared/parseAst.js:406:41)
+    at error (file:///d:/moin/mealsetu_project/frontend/node_modules/rollup/dist/es/shared/parseAst.js:402:42)
+    at ModuleLoader.loadEntryModule (file:///d:/moin/mealsetu_project/frontend/node_modules/rollup/dist/es/shared/node-entry.js:22147:20)
+    at async Promise.all (index 0)[39m

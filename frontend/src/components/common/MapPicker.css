@@ -1,0 +1,199 @@
+/* ── MapPicker overlay ──────────────────────────────────────────────────── */
+.mp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0;
+}
+
+.mp-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  height: 100dvh;          /* fill on mobile */
+  max-height: 100dvh;
+  background: #fff;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* On desktop, give it a card look */
+@media (min-width: 600px) {
+  .mp-modal {
+    height: 90vh;
+    max-height: 700px;
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.mp-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.mp-back-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(242, 101, 34, 0.10);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f26522;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.mp-back-icon { line-height: 1; }
+
+.mp-header-text { flex: 1; }
+.mp-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+.mp-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.mp-spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #f1f5f9;
+  border-top-color: #f26522;
+  border-radius: 50%;
+  animation: mp-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Map + pin ───────────────────────────────────────────────────────────── */
+.mp-map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 300px;   /* guarantees Leaflet gets a pixel height */
+}
+
+.mp-map {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* fixed crosshair pin always at map centre */
+.mp-pin-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);  /* tip sits at exact centre */
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 500;
+}
+
+.mp-pin-circle {
+  width: 44px;
+  height: 44px;
+  background: #f26522;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px rgba(242, 101, 34, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.mp-pin-stem {
+  width: 3px;
+  height: 14px;
+  background: #f26522;
+}
+
+.mp-pin-dot {
+  width: 6px;
+  height: 6px;
+  background: #f26522;
+  border-radius: 50%;
+}
+
+/* ── Bottom address card ─────────────────────────────────────────────────── */
+.mp-card {
+  background: #fff;
+  padding: 16px 16px 20px;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.mp-detected-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.mp-detected-icon { font-size: 14px; }
+.mp-detected-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.mp-loading-text {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 12px;
+}
+
+.mp-addr-lines { margin-bottom: 12px; }
+.mp-addr-line {
+  font-size: 13px;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+  display: flex;
+  gap: 6px;
+}
+.mp-no-address {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0 0 12px;
+}
+
+.mp-confirm-btn {
+  width: 100%;
+  height: 50px;
+  background: #f26522;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.mp-confirm-btn:hover { background: #d9551a; }
+
+/* ── Spinner keyframes ───────────────────────────────────────────────────── */
+@keyframes mp-spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,51 @@
+.safety-card {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.safety-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.safety-description {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.safety-protocols {
+  margin-top: 20px;
+}
+
+.protocol-item {
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.green-bg {
+  background: #f0fdf4;
+  border: 1px solid #16a34a;
+}
+
+.green-text {
+  color: #16a34a;
+}
+
+.protocol-item strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.protocol-item p {
+  margin: 5px 0 0 0;
+  font-size: 13px;
+  color: #475569;
+}

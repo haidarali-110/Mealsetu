@@ -1,0 +1,69 @@
+.reports {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reports-header h3 {
+  margin: 0;
+}
+
+.download-pdf-btn {
+  background: #f26522;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.filter-section {
+  margin-bottom: 30px;
+}
+
+.filter-select {
+  width: 200px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.reports-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 30px;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reports-table th,
+.reports-table td {
+  padding: 15px 10px;
+  text-align: left;
+}
+
+.reports-table th {
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+}
+
+.reports-table td {
+  border-bottom: 1px solid #f8fafc;
+}
+
+.status-settled {
+  color: #16a34a;
+  font-weight: bold;
+}

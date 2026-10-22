@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "424148821778",
+    "project_id": "mealsetu-786",
+    "storage_bucket": "mealsetu-786.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424148821778:android:e62c9add806b002bd1f5cb",
+        "android_client_info": {
+          "package_name": "com.mealsetu.mealsetu_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBr_2YLYKhq7nUZoVqMegsIuVz4e2TrWxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,1011 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.mealsetu.mealsetu_app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="36" />
+10    <!--
+11         The INTERNET permission is required for development. Specifically,
+12         the Flutter tool needs it to communicate with the running application
+13         to allow setting breakpoints, to provide hot reload, etc.
+14    -->
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:7:5-66
+15-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:7:22-64
+16    <!-- Location permissions for GPS-based vendor discovery -->
+17    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+17-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:4:5-78
+17-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:4:22-76
+18    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+18-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:5:5-80
+18-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:5:22-78
+19    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Phone calls from delivery partner / customer card -->
+19-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:8:5-78
+19-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:8:22-76
+20    <uses-permission android:name="android.permission.CALL_PHONE" /> <!-- POST_NOTIFICATIONS required for Android 13+ -->
+20-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:10:5-68
+20-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:10:22-66
+21    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+21-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:12:5-76
+21-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:12:22-74
+22    <!--
+23 Required to query activities that can process text, see:
+24         https://developer.android.com/training/package-visibility and
+25         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+26
+27         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
+28    -->
+29    <queries>
+29-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:80:5-85:15
+30        <intent>
+30-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:81:9-84:18
+31            <action android:name="android.intent.action.PROCESS_TEXT" />
+31-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:82:13-72
+31-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:82:21-70
+32
+33            <data android:mimeType="text/plain" />
+33-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+33-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:19-48
+34        </intent>
+35        <intent>
+35-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:16:9-22:18
+36            <action android:name="android.intent.action.VIEW" />
+36-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:13-65
+36-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:21-62
+37
+38            <data
+38-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+39                android:mimeType="*/*"
+39-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:19-48
+40                android:scheme="*" />
+41        </intent>
+42        <intent>
+42-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:23:9-32:18
+43            <action android:name="android.intent.action.VIEW" />
+43-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:13-65
+43-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:21-62
+44
+45            <category android:name="android.intent.category.BROWSABLE" />
+45-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:26:13-74
+45-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:26:23-71
+46
+47            <data
+47-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+48                android:host="pay"
+49                android:mimeType="*/*"
+49-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:19-48
+50                android:scheme="upi" />
+51        </intent>
+52        <intent>
+52-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:33:9-35:18
+53            <action android:name="android.intent.action.MAIN" />
+53-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:13-65
+53-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:21-62
+54        </intent>
+55        <intent>
+55-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:36:9-40:18
+56            <action android:name="android.intent.action.SEND" />
+56-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:37:13-65
+56-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:37:21-62
+57
+58            <data android:mimeType="*/*" />
+58-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+58-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:19-48
+59        </intent>
+60        <intent>
+60-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:41:9-43:18
+61            <action android:name="rzp.device_token.share" />
+61-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:42:13-61
+61-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:42:21-58
+62        </intent> <!-- Needs to be explicitly declared on Android R+ -->
+63        <package android:name="com.google.android.apps.maps" />
+63-->[com.google.android.gms:play-services-maps:20.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\dca3a38780e6a4330d4ed52341d51c1d\transformed\play-services-maps-20.0.0\AndroidManifest.xml:29:7-61
+63-->[com.google.android.gms:play-services-maps:20.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\dca3a38780e6a4330d4ed52341d51c1d\transformed\play-services-maps-20.0.0\AndroidManifest.xml:29:16-59
+64
+65        <intent>
+65-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:17:9-21:18
+66            <action android:name="android.intent.action.VIEW" />
+66-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:13-65
+66-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:21-62
+67
+68            <data android:scheme="upi" />
+68-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+69        </intent>
+70        <!--
+71             Package visibility (API 30+) for CRED discovery: BaseUtils queries
+72             credpay:// handlers (e.g. credpay://bio_auth/check for CRED biometric
+73             capability, credpay://checkout for CRED app detection)
+74        -->
+75        <intent>
+75-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:27:9-31:18
+76            <action android:name="android.intent.action.VIEW" />
+76-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:13-65
+76-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:21-62
+77
+78            <data android:scheme="credpay" />
+78-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+79        </intent>
+80    </queries>
+81
+82    <uses-permission android:name="android.permission.WAKE_LOCK" />
+82-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-68
+82-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:22-65
+83    <uses-permission android:name="android.permission.VIBRATE" />
+83-->[:flutter_local_notifications] D:\moin\mealsetu_project\mealsetu_app\build\flutter_local_notifications\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-66
+83-->[:flutter_local_notifications] D:\moin\mealsetu_project\mealsetu_app\build\flutter_local_notifications\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:22-63
+84    <uses-permission
+84-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-10:38
+85        android:name="android.permission.READ_EXTERNAL_STORAGE"
+85-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:9-64
+86        android:maxSdkVersion="32" />
+86-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:9-35
+87    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+87-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:5-76
+87-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:22-73
+88    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+88-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:5-75
+88-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:22-72
+89    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+89-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:5-75
+89-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:22-72
+90    <uses-permission android:name="android.permission.NFC" />
+90-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:9:5-62
+90-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:9:22-59
+91
+92    <uses-feature
+92-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:11:5-13:36
+93        android:name="android.hardware.nfc"
+93-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:12:9-44
+94        android:required="false" />
+94-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:13:9-33
+95    <uses-feature
+95-->[com.google.android.gms:play-services-maps:20.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\dca3a38780e6a4330d4ed52341d51c1d\transformed\play-services-maps-20.0.0\AndroidManifest.xml:22:5-24:33
+96        android:glEsVersion="0x00020000"
+96-->[com.google.android.gms:play-services-maps:20.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\dca3a38780e6a4330d4ed52341d51c1d\transformed\play-services-maps-20.0.0\AndroidManifest.xml:23:8-40
+97        android:required="true" /> <!-- Required by older versions of Google Play services to create IID tokens -->
+97-->[com.google.android.gms:play-services-maps:20.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\dca3a38780e6a4330d4ed52341d51c1d\transformed\play-services-maps-20.0.0\AndroidManifest.xml:24:8-31
+98    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+98-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:26:5-82
+98-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:26:22-79
+99    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+99-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:27:5-81
+99-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:27:22-78
+100    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+100-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:28:5-77
+100-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:28:22-74
+101
+102    <permission
+102-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:22:5-24:47
+103        android:name="com.mealsetu.mealsetu_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+103-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:23:9-81
+104        android:protectionLevel="signature" />
+104-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:24:9-44
+105
+106    <uses-permission android:name="com.mealsetu.mealsetu_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" /> <!-- Normal permission, automatically granted on API 23+ -->
+106-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:26:5-97
+106-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:26:22-94
+107    <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
+107-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:10:5-81
+107-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:10:22-78
+108
+109    <application
+110        android:name="android.app.Application"
+111        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+111-->[androidx.core:core:1.18.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\546e04a56d631c35966eda9211a5ae53\transformed\core-1.18.0\AndroidManifest.xml:28:18-86
+112        android:debuggable="true"
+113        android:extractNativeLibs="false"
+114        android:hardwareAccelerated="true"
+115        android:icon="@mipmap/ic_launcher"
+116        android:label="MealSetu" >
+117        <activity
+118            android:name="com.mealsetu.mealsetu_app.MainActivity"
+119            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+120            android:exported="true"
+121            android:hardwareAccelerated="true"
+122            android:launchMode="singleTop"
+123            android:taskAffinity=""
+124            android:theme="@style/LaunchTheme"
+125            android:windowSoftInputMode="adjustResize" >
+126
+127            <!--
+128                 Specifies an Android theme to apply to this Activity as soon as
+129                 the Android process has started. This theme is visible to the user
+130                 while the Flutter UI initializes. After that, this theme continues
+131                 to determine the Window background behind the Flutter UI.
+132            -->
+133            <meta-data
+134                android:name="io.flutter.embedding.android.NormalTheme"
+135                android:resource="@style/NormalTheme" />
+136
+137            <intent-filter>
+138                <action android:name="android.intent.action.MAIN" />
+138-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:13-65
+138-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:21-62
+139
+140                <category android:name="android.intent.category.LAUNCHER" />
+141            </intent-filter>
+142        </activity>
+143        <!-- FCM: default channel, icon, and brand colour -->
+144        <meta-data
+145            android:name="com.google.firebase.messaging.default_notification_channel_id"
+146            android:value="mealsetu_channel" />
+147        <meta-data
+148            android:name="com.google.firebase.messaging.default_notification_icon"
+149            android:resource="@mipmap/ic_launcher" />
+150        <meta-data
+151            android:name="com.google.firebase.messaging.default_notification_color"
+152            android:resource="@color/orange" />
+153
+154        <!-- Google Maps API key -->
+155        <meta-data
+156            android:name="com.google.android.geo.API_KEY"
+157            android:value="AIzaSyCgJ0v4LEJaPxZUQR20A56GpBeFa8cf3LQ" />
+158
+159        <!-- Today's Tiffin home-screen widget -->
+160        <receiver
+161            android:name="com.mealsetu.mealsetu_app.TiffinWidgetProvider"
+162            android:exported="true" >
+163            <intent-filter>
+164                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+165            </intent-filter>
+166
+167            <meta-data
+168                android:name="android.appwidget.provider"
+169                android:resource="@xml/tiffin_widget_info" />
+170        </receiver>
+171
+172        <!--
+173             Don't delete the meta-data below.
+174             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+175        -->
+176        <meta-data
+177            android:name="flutterEmbedding"
+178            android:value="2" />
+179
+180        <service
+180-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:9-17:72
+181            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingBackgroundService"
+181-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:13-107
+182            android:exported="false"
+182-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:16:13-37
+183            android:permission="android.permission.BIND_JOB_SERVICE" />
+183-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:17:13-69
+184        <service
+184-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:18:9-24:19
+185            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
+185-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:19:13-97
+186            android:exported="false" >
+186-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:13-37
+187            <intent-filter>
+187-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:21:13-23:29
+188                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+188-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:22:17-78
+188-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:22:25-75
+189            </intent-filter>
+190        </service>
+191
+192        <receiver
+192-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:26:9-33:20
+193            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingReceiver"
+193-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:27:13-98
+194            android:exported="true"
+194-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:28:13-36
+195            android:permission="com.google.android.c2dm.permission.SEND" >
+195-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:29:13-73
+196            <intent-filter>
+196-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:30:13-32:29
+197                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+197-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:31:17-81
+197-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:31:25-78
+198            </intent-filter>
+199        </receiver>
+200
+201        <service
+201-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:35:9-39:19
+202            android:name="com.google.firebase.components.ComponentDiscoveryService"
+202-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:35:18-89
+203            android:directBootAware="true"
+203-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:32:13-43
+204            android:exported="false" >
+204-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:56:13-37
+205            <meta-data
+205-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:36:13-38:85
+206                android:name="com.google.firebase.components:io.flutter.plugins.firebase.messaging.FlutterFirebaseAppRegistrar"
+206-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:37:17-128
+207                android:value="com.google.firebase.components.ComponentRegistrar" />
+207-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:38:17-82
+208            <meta-data
+208-->[:firebase_core] D:\moin\mealsetu_project\mealsetu_app\build\firebase_core\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-11:85
+209                android:name="com.google.firebase.components:io.flutter.plugins.firebase.core.FlutterFirebaseCoreRegistrar"
+209-->[:firebase_core] D:\moin\mealsetu_project\mealsetu_app\build\firebase_core\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:17-124
+210                android:value="com.google.firebase.components.ComponentRegistrar" />
+210-->[:firebase_core] D:\moin\mealsetu_project\mealsetu_app\build\firebase_core\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:17-82
+211            <meta-data
+211-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:57:13-59:85
+212                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
+212-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:58:17-122
+213                android:value="com.google.firebase.components.ComponentRegistrar" />
+213-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:59:17-82
+214            <meta-data
+214-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:60:13-62:85
+215                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+215-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:61:17-119
+216                android:value="com.google.firebase.components.ComponentRegistrar" />
+216-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:62:17-82
+217            <meta-data
+217-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:15:13-17:85
+218                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
+218-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:16:17-130
+219                android:value="com.google.firebase.components.ComponentRegistrar" />
+219-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:17:17-82
+220            <meta-data
+220-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:18:13-20:85
+221                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+221-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:19:17-127
+222                android:value="com.google.firebase.components.ComponentRegistrar" />
+222-->[com.google.firebase:firebase-installations:18.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\51c169bbf67c90bfb26755c0413dc9fe\transformed\firebase-installations-18.0.0\AndroidManifest.xml:20:17-82
+223            <meta-data
+223-->[com.google.firebase:firebase-common-ktx:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\c948df9c58bb8fbcde4153e83fdb93f0\transformed\firebase-common-ktx-21.0.0\AndroidManifest.xml:12:13-14:85
+224                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+224-->[com.google.firebase:firebase-common-ktx:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\c948df9c58bb8fbcde4153e83fdb93f0\transformed\firebase-common-ktx-21.0.0\AndroidManifest.xml:13:17-116
+225                android:value="com.google.firebase.components.ComponentRegistrar" />
+225-->[com.google.firebase:firebase-common-ktx:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\c948df9c58bb8fbcde4153e83fdb93f0\transformed\firebase-common-ktx-21.0.0\AndroidManifest.xml:14:17-82
+226            <meta-data
+226-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:35:13-37:85
+227                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+227-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:36:17-109
+228                android:value="com.google.firebase.components.ComponentRegistrar" />
+228-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:37:17-82
+229            <meta-data
+229-->[com.google.firebase:firebase-datatransport:18.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\146b3db4cf8a9dafc7b8bdf75bc32c9c\transformed\firebase-datatransport-18.2.0\AndroidManifest.xml:25:13-27:85
+230                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
+230-->[com.google.firebase:firebase-datatransport:18.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\146b3db4cf8a9dafc7b8bdf75bc32c9c\transformed\firebase-datatransport-18.2.0\AndroidManifest.xml:26:17-115
+231                android:value="com.google.firebase.components.ComponentRegistrar" />
+231-->[com.google.firebase:firebase-datatransport:18.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\146b3db4cf8a9dafc7b8bdf75bc32c9c\transformed\firebase-datatransport-18.2.0\AndroidManifest.xml:27:17-82
+232        </service>
+233
+234        <provider
+234-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:41:9-45:38
+235            android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingInitProvider"
+235-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:42:13-102
+236            android:authorities="com.mealsetu.mealsetu_app.flutterfirebasemessaginginitprovider"
+236-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:43:13-88
+237            android:exported="false"
+237-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:44:13-37
+238            android:initOrder="99" />
+238-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:45:13-35
+239
+240        <uses-library
+240-->[:google_maps_flutter_android] D:\moin\mealsetu_project\mealsetu_app\build\google_maps_flutter_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-10:40
+241            android:name="org.apache.http.legacy"
+241-->[:google_maps_flutter_android] D:\moin\mealsetu_project\mealsetu_app\build\google_maps_flutter_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-50
+242            android:required="false" />
+242-->[:google_maps_flutter_android] D:\moin\mealsetu_project\mealsetu_app\build\google_maps_flutter_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:13-37
+243
+244        <provider
+244-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:9-17:20
+245            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
+245-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:13-82
+246            android:authorities="com.mealsetu.mealsetu_app.flutter.image_provider"
+246-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:13-74
+247            android:exported="false"
+247-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:13-37
+248            android:grantUriPermissions="true" >
+248-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:13-47
+249            <meta-data
+249-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:13-16:75
+250                android:name="android.support.FILE_PROVIDER_PATHS"
+250-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:17-67
+251                android:resource="@xml/flutter_image_picker_file_paths" />
+251-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:16:17-72
+252        </provider> <!-- Trigger Google Play services to install the backported photo picker module. -->
+253        <service
+253-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:19:9-31:19
+254            android:name="com.google.android.gms.metadata.ModuleDependencies"
+254-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:13-78
+255            android:enabled="false"
+255-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:21:13-36
+256            android:exported="false" >
+256-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:22:13-37
+257            <intent-filter>
+257-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:24:13-26:29
+258                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+258-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:25:17-94
+258-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:25:25-91
+259            </intent-filter>
+260
+261            <meta-data
+261-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:28:13-30:36
+262                android:name="photopicker_activity:0:required"
+262-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:29:17-63
+263                android:value="" />
+263-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:30:17-33
+264        </service>
+265        <service
+265-->[:geolocator_android] D:\moin\mealsetu_project\mealsetu_app\build\geolocator_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-12:56
+266            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+266-->[:geolocator_android] D:\moin\mealsetu_project\mealsetu_app\build\geolocator_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-77
+267            android:enabled="true"
+267-->[:geolocator_android] D:\moin\mealsetu_project\mealsetu_app\build\geolocator_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:13-35
+268            android:exported="false"
+268-->[:geolocator_android] D:\moin\mealsetu_project\mealsetu_app\build\geolocator_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:13-37
+269            android:foregroundServiceType="location" />
+269-->[:geolocator_android] D:\moin\mealsetu_project\mealsetu_app\build\geolocator_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:13-53
+270
+271        <provider
+271-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:16:9-25:20
+272            android:name="com.crazecoder.openfile.FileProvider"
+272-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:17:13-64
+273            android:authorities="com.mealsetu.mealsetu_app.fileProvider.com.crazecoder.openfile"
+273-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:18:13-88
+274            android:exported="false"
+274-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:19:13-37
+275            android:grantUriPermissions="true" >
+275-->[:open_filex] D:\moin\mealsetu_project\mealsetu_app\build\open_filex\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:13-47
+276            <meta-data
+276-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:13-16:75
+277                android:name="android.support.FILE_PROVIDER_PATHS"
+277-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:17-67
+278                android:resource="@xml/filepaths" />
+278-->[:image_picker_android] D:\moin\mealsetu_project\mealsetu_app\build\image_picker_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:16:17-72
+279        </provider>
+280
+281        <activity
+281-->[:url_launcher_android] D:\moin\mealsetu_project\mealsetu_app\build\url_launcher_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-11:74
+282            android:name="io.flutter.plugins.urllauncher.WebViewActivity"
+282-->[:url_launcher_android] D:\moin\mealsetu_project\mealsetu_app\build\url_launcher_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-74
+283            android:exported="false"
+283-->[:url_launcher_android] D:\moin\mealsetu_project\mealsetu_app\build\url_launcher_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:10:13-37
+284            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+284-->[:url_launcher_android] D:\moin\mealsetu_project\mealsetu_app\build\url_launcher_android\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:13-71
+285        <activity
+285-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:23:9-27:40
+286            android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+286-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:24:13-85
+287            android:enabled="true"
+287-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:25:13-35
+288            android:excludeFromRecents="true"
+288-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:26:13-46
+289            android:exported="false" />
+289-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:27:13-37
+290        <activity
+290-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:28:9-35:81
+291            android:name="androidx.glance.appwidget.action.InvisibleActionTrampolineActivity"
+291-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:29:13-94
+292            android:enabled="true"
+292-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:30:13-35
+293            android:exported="false"
+293-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:31:13-37
+294            android:launchMode="singleInstance"
+294-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:32:13-48
+295            android:noHistory="true"
+295-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:33:13-37
+296            android:taskAffinity="androidx.glance.appwidget.ListAdapterCallbackTrampoline"
+296-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:34:13-91
+297            android:theme="@style/Widget.Glance.AppWidget.CallbackTrampoline" />
+297-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:35:13-78
+298
+299        <receiver
+299-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:37:9-40:40
+300            android:name="androidx.glance.appwidget.action.ActionCallbackBroadcastReceiver"
+300-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:38:13-92
+301            android:enabled="true"
+301-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:39:13-35
+302            android:exported="false" />
+302-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:40:13-37
+303        <receiver
+303-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:41:9-48:20
+304            android:name="androidx.glance.appwidget.MyPackageReplacedReceiver"
+304-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:42:13-79
+305            android:enabled="true"
+305-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:43:13-35
+306            android:exported="false" >
+306-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:44:13-37
+307            <intent-filter>
+307-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:45:13-47:29
+308                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+308-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:46:17-84
+308-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:46:25-81
+309            </intent-filter>
+310        </receiver>
+311
+312        <service
+312-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:50:9-53:72
+313            android:name="androidx.glance.appwidget.GlanceRemoteViewsService"
+313-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:51:13-78
+314            android:exported="true"
+314-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:52:13-36
+315            android:permission="android.permission.BIND_REMOTEVIEWS" />
+315-->[androidx.glance:glance-appwidget:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\cbbd8a755fcddbb7903a8c775936edd6\transformed\glance-appwidget-1.0.0\AndroidManifest.xml:53:13-69
+316
+317        <uses-library
+317-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:23:9-25:40
+318            android:name="androidx.window.extensions"
+318-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:24:13-54
+319            android:required="false" />
+319-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:25:13-37
+320        <uses-library
+320-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:26:9-28:40
+321            android:name="androidx.window.sidecar"
+321-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:27:13-51
+322            android:required="false" />
+322-->[androidx.window:window:1.2.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\7d5247ebb257dea0d32f4740996b3fdf\transformed\window-1.2.0\AndroidManifest.xml:28:13-37
+323
+324        <meta-data
+324-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:24:9-26:69
+325            android:name="com.google.android.gms.version"
+325-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:25:13-58
+326            android:value="@integer/google_play_services_version" />
+326-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:26:13-66
+327
+328        <provider
+328-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:28:9-36:20
+329            android:name="androidx.startup.InitializationProvider"
+329-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:29:13-67
+330            android:authorities="com.mealsetu.mealsetu_app.androidx-startup"
+330-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:30:13-68
+331            android:exported="false" >
+331-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:31:13-37
+332            <meta-data
+332-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:33:13-35:52
+333                android:name="com.google.maps.android.utils.attribution.AttributionIdInitializer"
+333-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:34:17-98
+334                android:value="androidx.startup" />
+334-->[com.google.maps.android:android-maps-utils:4.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\97206e09680cd4fdd5fdb99b2782d532\transformed\android-maps-utils-4.1.0\AndroidManifest.xml:35:17-49
+335            <meta-data
+335-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:62:13-64:52
+336                android:name="com.razorpay.RazorpayInitializer"
+336-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:63:17-64
+337                android:value="androidx.startup" />
+337-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:64:17-49
+338            <meta-data
+338-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:65:13-67:52
+339                android:name="com.razorpay.CoreInitializer"
+339-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:66:17-60
+340                android:value="androidx.startup" />
+340-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:67:17-49
+341            <meta-data
+341-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:36:13-38:52
+342                android:name="androidx.work.WorkManagerInitializer"
+342-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:37:17-68
+343                android:value="androidx.startup" />
+343-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:38:17-49
+344            <meta-data
+344-->[androidx.emoji2:emoji2:1.3.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\fc5c4d95ba5aaca84a3cf94d36d6a0bf\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+345                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+345-->[androidx.emoji2:emoji2:1.3.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\fc5c4d95ba5aaca84a3cf94d36d6a0bf\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+346                android:value="androidx.startup" />
+346-->[androidx.emoji2:emoji2:1.3.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\fc5c4d95ba5aaca84a3cf94d36d6a0bf\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+347            <meta-data
+347-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\4f6e7fe1238350ce2b9aad3f712d1723\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+348                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+348-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\4f6e7fe1238350ce2b9aad3f712d1723\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+349                android:value="androidx.startup" />
+349-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\4f6e7fe1238350ce2b9aad3f712d1723\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+350            <meta-data
+350-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+351                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+351-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+352                android:value="androidx.startup" />
+352-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+353        </provider>
+354
+355        <activity
+355-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:47:9-55:20
+356            android:name="com.razorpay.CheckoutActivity"
+356-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:48:13-57
+357            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+357-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:49:13-83
+358            android:exported="false"
+358-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:50:13-37
+359            android:theme="@style/CheckoutTheme" >
+359-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:51:13-49
+360            <intent-filter>
+360-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:52:13-54:29
+361                <action android:name="android.intent.action.MAIN" />
+361-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:13-65
+361-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:34:21-62
+362            </intent-filter>
+363        </activity>
+364        <activity
+364-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:70:9-73:75
+365            android:name="com.razorpay.MagicXActivity"
+365-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:71:13-55
+366            android:exported="false"
+366-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:72:13-37
+367            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+367-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:73:13-72
+368
+369        <receiver
+369-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:29:9-40:20
+370            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+370-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:30:13-78
+371            android:exported="true"
+371-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:31:13-36
+372            android:permission="com.google.android.c2dm.permission.SEND" >
+372-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:32:13-73
+373            <intent-filter>
+373-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:30:13-32:29
+374                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+374-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:31:17-81
+374-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:31:25-78
+375            </intent-filter>
+376
+377            <meta-data
+377-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:37:13-39:40
+378                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
+378-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:38:17-92
+379                android:value="true" />
+379-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:39:17-37
+380        </receiver>
+381        <!--
+382             FirebaseMessagingService performs security checks at runtime,
+383             but set to not exported to explicitly avoid allowing another app to call it.
+384        -->
+385        <service
+385-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:46:9-53:19
+386            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+386-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:47:13-82
+387            android:directBootAware="true"
+387-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:48:13-43
+388            android:exported="false" >
+388-->[com.google.firebase:firebase-messaging:24.1.2] C:\Users\uvesh\.gradle\caches\8.14\transforms\a91f712b6abfae02dc6f73357bd91bcb\transformed\firebase-messaging-24.1.2\AndroidManifest.xml:49:13-37
+389            <intent-filter android:priority="-500" >
+389-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:21:13-23:29
+390                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+390-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:22:17-78
+390-->[:firebase_messaging] D:\moin\mealsetu_project\mealsetu_app\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:22:25-75
+391            </intent-filter>
+392        </service>
+393
+394        <activity
+394-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:23:9-27:75
+395            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+395-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:24:13-93
+396            android:excludeFromRecents="true"
+396-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:25:13-46
+397            android:exported="false"
+397-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:26:13-37
+398            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+398-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:27:13-72
+399        <!--
+400            Service handling Google Sign-In user revocation. For apps that do not integrate with
+401            Google Sign-In, this service will never be started.
+402        -->
+403        <service
+403-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:33:9-37:51
+404            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+404-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:34:13-89
+405            android:exported="true"
+405-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:35:13-36
+406            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+406-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:36:13-107
+407            android:visibleToInstantApps="true" />
+407-->[com.google.android.gms:play-services-auth:21.1.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\27adb39bb06b6b9ab65f68520e5c404a\transformed\play-services-auth-21.1.0\AndroidManifest.xml:37:13-48
+408
+409        <activity
+409-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\9c036db7f969f97e63c8c0d91240d93b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+410            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+410-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\9c036db7f969f97e63c8c0d91240d93b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+411            android:exported="false"
+411-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\9c036db7f969f97e63c8c0d91240d93b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+412            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+412-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\9c036db7f969f97e63c8c0d91240d93b\transformed\play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+413
+414        <provider
+414-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:23:9-28:39
+415            android:name="com.google.firebase.provider.FirebaseInitProvider"
+415-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:24:13-77
+416            android:authorities="com.mealsetu.mealsetu_app.firebaseinitprovider"
+416-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:25:13-72
+417            android:directBootAware="true"
+417-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:26:13-43
+418            android:exported="false"
+418-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:27:13-37
+419            android:initOrder="100" />
+419-->[com.google.firebase:firebase-common:21.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\a9405fad147782ad01ba5f08bf965ac5\transformed\firebase-common-21.0.0\AndroidManifest.xml:28:13-36
+420
+421        <service
+421-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:41:9-46:35
+422            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+422-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:42:13-88
+423            android:directBootAware="false"
+423-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:43:13-44
+424            android:enabled="@bool/enable_system_alarm_service_default"
+424-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:44:13-72
+425            android:exported="false" />
+425-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:45:13-37
+426        <service
+426-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:47:9-53:35
+427            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+427-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:48:13-84
+428            android:directBootAware="false"
+428-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:49:13-44
+429            android:enabled="@bool/enable_system_job_service_default"
+429-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:50:13-70
+430            android:exported="true"
+430-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:51:13-36
+431            android:permission="android.permission.BIND_JOB_SERVICE" />
+431-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:52:13-69
+432        <service
+432-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:54:9-59:35
+433            android:name="androidx.work.impl.foreground.SystemForegroundService"
+433-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:55:13-81
+434            android:directBootAware="false"
+434-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:56:13-44
+435            android:enabled="@bool/enable_system_foreground_service_default"
+435-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:57:13-77
+436            android:exported="false" />
+436-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:58:13-37
+437
+438        <receiver
+438-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:61:9-66:35
+439            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+439-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:62:13-88
+440            android:directBootAware="false"
+440-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:63:13-44
+441            android:enabled="true"
+441-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:64:13-35
+442            android:exported="false" />
+442-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:65:13-37
+443        <receiver
+443-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:67:9-77:20
+444            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+444-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:68:13-106
+445            android:directBootAware="false"
+445-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:69:13-44
+446            android:enabled="false"
+446-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:70:13-36
+447            android:exported="false" >
+447-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:71:13-37
+448            <intent-filter>
+448-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:73:13-76:29
+449                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+449-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:74:17-87
+449-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:74:25-84
+450                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+450-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:75:17-90
+450-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:75:25-87
+451            </intent-filter>
+452        </receiver>
+453        <receiver
+453-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:78:9-88:20
+454            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+454-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:79:13-104
+455            android:directBootAware="false"
+455-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:80:13-44
+456            android:enabled="false"
+456-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:81:13-36
+457            android:exported="false" >
+457-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:82:13-37
+458            <intent-filter>
+458-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:84:13-87:29
+459                <action android:name="android.intent.action.BATTERY_OKAY" />
+459-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:85:17-77
+459-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:85:25-74
+460                <action android:name="android.intent.action.BATTERY_LOW" />
+460-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:86:17-76
+460-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:86:25-73
+461            </intent-filter>
+462        </receiver>
+463        <receiver
+463-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:89:9-99:20
+464            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+464-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:90:13-104
+465            android:directBootAware="false"
+465-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:91:13-44
+466            android:enabled="false"
+466-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:92:13-36
+467            android:exported="false" >
+467-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:93:13-37
+468            <intent-filter>
+468-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:95:13-98:29
+469                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+469-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:96:17-83
+469-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:96:25-80
+470                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+470-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:97:17-82
+470-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:97:25-79
+471            </intent-filter>
+472        </receiver>
+473        <receiver
+473-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:100:9-109:20
+474            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+474-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:101:13-103
+475            android:directBootAware="false"
+475-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:102:13-44
+476            android:enabled="false"
+476-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:103:13-36
+477            android:exported="false" >
+477-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:104:13-37
+478            <intent-filter>
+478-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:106:13-108:29
+479                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+479-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:107:17-79
+479-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:107:25-76
+480            </intent-filter>
+481        </receiver>
+482        <receiver
+482-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:110:9-121:20
+483            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+483-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:111:13-88
+484            android:directBootAware="false"
+484-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:112:13-44
+485            android:enabled="false"
+485-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:113:13-36
+486            android:exported="false" >
+486-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:114:13-37
+487            <intent-filter>
+487-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:116:13-120:29
+488                <action android:name="android.intent.action.BOOT_COMPLETED" />
+488-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:117:17-79
+488-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:117:25-76
+489                <action android:name="android.intent.action.TIME_SET" />
+489-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:118:17-73
+489-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:118:25-70
+490                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+490-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:119:17-81
+490-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:119:25-78
+491            </intent-filter>
+492        </receiver>
+493        <receiver
+493-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:122:9-131:20
+494            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+494-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:123:13-99
+495            android:directBootAware="false"
+495-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:124:13-44
+496            android:enabled="@bool/enable_system_alarm_service_default"
+496-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:125:13-72
+497            android:exported="false" >
+497-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:126:13-37
+498            <intent-filter>
+498-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:128:13-130:29
+499                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+499-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:129:17-98
+499-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:129:25-95
+500            </intent-filter>
+501        </receiver>
+502        <receiver
+502-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:132:9-142:20
+503            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+503-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:133:13-78
+504            android:directBootAware="false"
+504-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:134:13-44
+505            android:enabled="true"
+505-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:135:13-35
+506            android:exported="true"
+506-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:136:13-36
+507            android:permission="android.permission.DUMP" >
+507-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:137:13-57
+508            <intent-filter>
+508-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:139:13-141:29
+509                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+509-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:140:17-88
+509-->[androidx.work:work-runtime:2.7.1] C:\Users\uvesh\.gradle\caches\8.14\transforms\1248ef14e24039dcdb00bec4dbb17ce1\transformed\work-runtime-2.7.1\AndroidManifest.xml:140:25-85
+510            </intent-filter>
+511        </receiver>
+512
+513        <service
+513-->[androidx.core:core-remoteviews:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\3c995d0b5ee8fd6029fe7118f3ef90ca\transformed\core-remoteviews-1.0.0\AndroidManifest.xml:24:9-27:63
+514            android:name="androidx.core.widget.RemoteViewsCompatService"
+514-->[androidx.core:core-remoteviews:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\3c995d0b5ee8fd6029fe7118f3ef90ca\transformed\core-remoteviews-1.0.0\AndroidManifest.xml:25:13-73
+515            android:permission="android.permission.BIND_REMOTEVIEWS" />
+515-->[androidx.core:core-remoteviews:1.0.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\3c995d0b5ee8fd6029fe7118f3ef90ca\transformed\core-remoteviews-1.0.0\AndroidManifest.xml:26:13-69
+516
+517        <receiver
+517-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+518            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+518-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+519            android:directBootAware="false"
+519-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+520            android:enabled="true"
+520-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+521            android:exported="true"
+521-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+522            android:permission="android.permission.DUMP" >
+522-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+523            <intent-filter>
+523-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+524                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+524-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+524-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+525            </intent-filter>
+526            <intent-filter>
+526-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+527                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+527-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+527-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+528            </intent-filter>
+529            <intent-filter>
+529-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+530                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+530-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+530-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+531            </intent-filter>
+532            <intent-filter>
+532-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+533                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+533-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+533-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\uvesh\.gradle\caches\8.14\transforms\aecb578154b1398d5ea13791f4f0b59a\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+534            </intent-filter>
+535        </receiver>
+536
+537        <service
+537-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:28:9-34:19
+538            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+538-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:29:13-103
+539            android:exported="false" >
+539-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:30:13-37
+540            <meta-data
+540-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:31:13-33:39
+541                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+541-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:32:17-94
+542                android:value="cct" />
+542-->[com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\14826d25597d4f606f82be6bc131ae9e\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:33:17-36
+543        </service>
+544        <service
+544-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:26:9-30:19
+545            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+545-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:27:13-117
+546            android:exported="false"
+546-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:28:13-37
+547            android:permission="android.permission.BIND_JOB_SERVICE" >
+547-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:29:13-69
+548        </service>
+549
+550        <receiver
+550-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:32:9-34:40
+551            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+551-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:33:13-132
+552            android:exported="false" />
+552-->[com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\uvesh\.gradle\caches\8.14\transforms\a20a8005e5d8af10ec814f383a85e6f2\transformed\transport-runtime-3.1.9\AndroidManifest.xml:34:13-37
+553
+554        <service
+554-->[androidx.room:room-runtime:2.2.5] C:\Users\uvesh\.gradle\caches\8.14\transforms\79810e9eb2a37cc2c670eb5d24e09d59\transformed\room-runtime-2.2.5\AndroidManifest.xml:25:9-28:40
+555            android:name="androidx.room.MultiInstanceInvalidationService"
+555-->[androidx.room:room-runtime:2.2.5] C:\Users\uvesh\.gradle\caches\8.14\transforms\79810e9eb2a37cc2c670eb5d24e09d59\transformed\room-runtime-2.2.5\AndroidManifest.xml:26:13-74
+556            android:directBootAware="true"
+556-->[androidx.room:room-runtime:2.2.5] C:\Users\uvesh\.gradle\caches\8.14\transforms\79810e9eb2a37cc2c670eb5d24e09d59\transformed\room-runtime-2.2.5\AndroidManifest.xml:27:13-43
+557            android:exported="false" />
+557-->[androidx.room:room-runtime:2.2.5] C:\Users\uvesh\.gradle\caches\8.14\transforms\79810e9eb2a37cc2c670eb5d24e09d59\transformed\room-runtime-2.2.5\AndroidManifest.xml:28:13-37
+558
+559        <activity
+559-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:35:9-49:20
+560            android:name="com.razorpay.DeeplinkActivity"
+560-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:36:13-57
+561            android:exported="true"
+561-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:37:13-36
+562            android:theme="@style/CheckoutTheme" >
+562-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:38:13-49
+563            <intent-filter>
+563-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:39:13-48:29
+564                <action android:name="android.intent.action.VIEW" />
+564-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:13-65
+564-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:17:21-62
+565
+566                <category android:name="android.intent.category.DEFAULT" />
+566-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:42:17-76
+566-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:42:27-73
+567                <category android:name="android.intent.category.BROWSABLE" />
+567-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:26:13-74
+567-->[com.razorpay:standard-core:1.7.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\785df7cbcf4b71c34604920d1dbb541d\transformed\standard-core-1.7.20\AndroidManifest.xml:26:23-71
+568
+569                <data
+569-->D:\moin\mealsetu_project\mealsetu_app\android\app\src\main\AndroidManifest.xml:83:13-50
+570                    android:host="com.mealsetu.mealsetu_app"
+571                    android:scheme="razorpay" />
+572            </intent-filter>
+573        </activity>
+574
+575        <receiver
+575-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:51:9-53:40
+576            android:name="com.razorpay.UpiChooserSelectionReceiver"
+576-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:52:13-68
+577            android:exported="false" />
+577-->[com.razorpay:core:1.0.20] C:\Users\uvesh\.gradle\caches\8.14\transforms\ab3380a53cc07c70e1f7e620972e3463\transformed\core-1.0.20\AndroidManifest.xml:53:13-37
+578    </application>
+579
+580</manifest>

@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/layout_tiffin_widget_layout.xml.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/layout/tiffin_widget_layout.xml"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/drawable-v21_launch_background.xml.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/drawable-v21/launch_background.xml"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/drawable_tiffin_widget_background.xml.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/drawable/tiffin_widget_background.xml"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/drawable_widget_background.xml.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/drawable/widget_background.xml"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/xml_tiffin_widget_info.xml.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/xml/tiffin_widget_info.xml"
+    },
+    {
+        "merged": "com.mealsetu.mealsetu_app-debug-71:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.mealsetu.mealsetu_app-main-65:/mipmap-hdpi/ic_launcher.png"
+    }
+]

@@ -1,0 +1,51 @@
+.welcome-card {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid #eef2f6;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f26522;
+}
+
+.welcome-text h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.welcome-text p {
+  color: #64748b;
+  margin: 5px 0;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.detect-btn {
+  width: auto;
+  padding: 10px 20px;
+}
+
+.security-btn {
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  background: white;
+  padding: 5px 15px;
+  border-radius: 8px;
+}

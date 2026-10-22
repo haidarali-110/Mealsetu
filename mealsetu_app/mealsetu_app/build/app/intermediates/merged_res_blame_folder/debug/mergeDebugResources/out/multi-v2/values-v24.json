@@ -1,0 +1,36 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.mealsetu.mealsetu_app-mergeDebugResources-69:/values-v24/values-v24.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\uvesh\\.gradle\\caches\\8.14\\transforms\\7e994ce1caff23839af9786c187ab304\\transformed\\appcompat-1.7.1\\res\\values-v24\\values-v24.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,212",
+                        "endColumns": "156,134",
+                        "endOffsets": "207,342"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\uvesh\\.gradle\\caches\\8.14\\transforms\\d4d26fbc17689b93385b80bf68f9abb9\\transformed\\media-1.1.0\\res\\values-v24\\values-v24.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,121,182,248",
+                        "endColumns": "65,60,65,66",
+                        "endOffsets": "116,177,243,310"
+                    },
+                    "to": {
+                        "startLines": "4,5,6,7",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "347,413,474,540",
+                        "endColumns": "65,60,65,66",
+                        "endOffsets": "408,469,535,602"
+                    }
+                }
+            ]
+        }
+    ]
+}

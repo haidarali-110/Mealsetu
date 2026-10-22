@@ -1,0 +1,30 @@
+Step1:
+cd C:\M.C.A\sem-2\Project\mealsetu   this local machine project path
+
+Step2:
+git add .
+
+Step3:
+git status
+
+Step4:
+git commit -m "apne jo modifid kare wofile kaname likhna he ex: Landingpage"
+
+Step5:
+git push origin main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

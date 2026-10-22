@@ -1,0 +1,403 @@
+.offers-container {
+  padding: 10px;
+}
+
+.offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Loading State */
+.offers-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #64748b;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #f26522;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.offers-error {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fef2f2;
+  border-radius: 12px;
+  color: #dc2626;
+}
+
+/* Empty State */
+.offers-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+/* Dynamic Offer Card */
+.offer-card-dynamic {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  max-width: 380px;
+  width: 100%;
+}
+
+.offer-card-dynamic:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Image Container */
+.offer-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.offer-poster-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.offer-vendor-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Offer Details */
+.offer-details {
+  padding: 16px;
+}
+
+/* Validity */
+.offer-validity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.validity-label {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.validity-dates {
+  font-size: 13px;
+  color: #2b3674;
+  font-weight: 500;
+}
+
+/* Discounts Section */
+.offer-discounts {
+  margin-bottom: 20px;
+}
+
+.discount-plans {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discount-plan-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 10px;
+  border: 1px solid #86efac;
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #166534;
+  font-size: 14px;
+}
+
+.plan-discount {
+  background: #16a34a;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.plan-prices {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.discounted-price {
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Redeem Button */
+.redeem-btn {
+  width: 100%;
+  height: 44px;
+  background: #f26522;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.redeem-btn:hover {
+  background: #e55a1a;
+  transform: scale(1.02);
+}
+
+.redeem-btn:active {
+  transform: scale(0.98);
+}
+
+/* Coming Soon Badge */
+.coming-soon-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background: #e2e8f0;
+  border-radius: 8px;
+}
+
+.coming-soon-label {
+  background: #3b82f6;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.coming-soon-date {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Coming Soon Overlay */
+.offer-poster-image.coming-soon {
+  opacity: 0.85;
+}
+
+/* Offer card coming soon - non-clickable */
+.offer-card-dynamic.coming-soon {
+  cursor: default;
+}
+
+.offer-card-dynamic.coming-soon:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Claimed Badge - thin green border on card */
+.offer-card-dynamic.claimed {
+  border-left: 3px solid #16a34a;
+  background-color: #f0fdf4;
+}
+
+/* Claimed Badge Overlay on image */
+.claimed-badge-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.claimed-badge-text {
+  background: #16a34a;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Claimed Badge (replaces Redeem Offer button) */
+.claimed-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #86efac;
+}
+
+.claimed-icon {
+  width: 32px;
+  height: 32px;
+  background: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.claimed-icon svg {
+  color: white;
+}
+
+.claimed-label {
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.claimed-subtext {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* New Claimed Badge - exactly as specified */
+.claimed-badge-new {
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.claimed-badge-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claimed-checkmark {
+  color: #16a34a;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.claimed-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.claimed-text-main {
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.claimed-text-sub {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* Old offer card styles (kept for backward compatibility) */
+.offer-card {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  position: relative;
+}
+
+.orange-border {
+  border-left: 6px solid #f26522;
+}
+
+.green-border {
+  border-left: 6px solid #16a34a;
+}
+
+.gray-border {
+  border-left: 6px solid #334155;
+}
+
+.offer-tag {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.copy-btn {
+  cursor: pointer;
+}
+
+/* Mobile Responsive - Single column below 480px */
+@media (max-width: 480px) {
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .offer-card-dynamic {
+    max-width: 100%;
+  }
+}
+

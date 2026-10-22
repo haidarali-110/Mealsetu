@@ -1,0 +1,244 @@
+.admin-profile {
+  padding: 40px;
+  background: #f1f5f9;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: #374151;
+  background: #f9fafb;
+}
+
+.tab-btn.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.profile-content {
+  max-width: 800px;
+}
+
+/* Profile Section */
+.profile-section {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+
+
+/* Security Section */
+.security-section {
+  max-width: 500px;
+}
+
+/* Form Styles */
+.profile-form,
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container input {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.password-requirements {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.password-requirements h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.password-requirements ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.password-requirements li {
+  margin-bottom: 4px;
+}
+
+/* Button Styles */
+.save-btn,
+.change-password-btn {
+  padding: 12px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.save-btn:hover,
+.change-password-btn:hover {
+  background: #2563eb;
+}
+
+.save-btn:active,
+.change-password-btn:active {
+  background: #1d4ed8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-profile {
+    padding: 20px;
+  }
+
+  .profile-section {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .profile-image-section {
+    order: -1;
+  }
+
+  .profile-tabs {
+    flex-direction: column;
+  }
+
+  .tab-btn {
+    justify-content: center;
+    border-bottom: none;
+    border-right: 2px solid transparent;
+  }
+
+  .tab-btn.active {
+    border-bottom-color: transparent;
+    border-right-color: #3b82f6;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 14px 16px;
+  }
+
+  .save-btn,
+  .change-password-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-image-container {
+    width: 120px;
+    height: 120px;
+  }
+
+  .image-upload-btn {
+    width: 32px;
+    height: 32px;
+    bottom: 4px;
+    right: 4px;
+  }
+
+  .profile-section {
+    gap: 20px;
+  }
+}

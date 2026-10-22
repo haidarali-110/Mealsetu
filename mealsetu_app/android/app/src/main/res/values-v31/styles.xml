@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31) uses the SplashScreen API.
+         windowBackground is ignored — use windowSplashScreenBackground instead.
+         This overrides the default white/black system splash color. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">@color/orange</item>
+        <item name="android:windowBackground">@color/orange</item>
+        <item name="android:statusBarColor">@color/orange</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

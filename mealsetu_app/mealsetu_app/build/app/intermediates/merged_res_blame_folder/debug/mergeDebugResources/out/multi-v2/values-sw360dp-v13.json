@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.mealsetu.mealsetu_app-mergeDebugResources-69:/values-sw360dp-v13/values-sw360dp-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\uvesh\\.gradle\\caches\\8.14\\transforms\\f35df933e1d63d9f318a1c4d3db245df\\transformed\\preference-1.2.1\\res\\values-sw360dp-v13\\values-sw360dp-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "71",
+                        "endOffsets": "122"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,79 @@
+.menu-planner {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.menu-header h3 {
+  color: #2b3674;
+}
+
+.cycle-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.cycle-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #f4f7fe;
+  color: #2b3674;
+  font-weight: 600;
+}
+
+.cycle-btn.active {
+  background: #f26522;
+  color: #fff;
+}
+
+.menu-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.form-row {
+  display: flex;
+  gap: 25px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.menu-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.update-menu-btn {
+  background: #f26522;
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 30px;
+  width: auto;
+  justify-content: center;
+}
