@@ -66,6 +66,7 @@ const computeSubscriptionDates = (planDurationDays, purchaseTime = new Date()) =
  */
 const getPlanDurationDays = (planType) => {
   const map = {
+    daily: 1, Daily: 1,
     trial: 2, Trial: 2,
     weekly: 7, Weekly: 7,
     monthly: 30, Monthly: 30,

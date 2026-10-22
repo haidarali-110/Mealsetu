@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { onEvent, offEvent } from '../../../utils/socket';
 import { useToast } from '../../common/Toast';
 import {
@@ -11,6 +11,8 @@ import {
   createSalaryRazorpayOrder,
   verifySalaryRazorpayPayment,
   getDeliveryBatches,
+  getUnbatchedOrders,
+  assignOrdersToRider,
   createDeliveryBatches,
   assignBatchToRider,
   reassignBatch,
@@ -624,22 +626,25 @@ const RiderCard = ({ rider, onEdit, onDelete, onMarkPaid }) => {
 };
 
 /* ─── Detailed batch card ────────────────────────────────────────────── */
-const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
+const DetailedBatchCard = ({ batch, riders = [], onAssign, onMoveOrder }) => {
   const [expanded,   setExpanded]   = useState(false);
   const [assigning,  setAssigning]  = useState(false);
   const [selectedRiderId, setSelectedRiderId] = useState('');
   const [photoModal, setPhotoModal] = useState(null);
+  const [moveTargets, setMoveTargets] = useState({});
+  const [movingOrder, setMovingOrder] = useState({});
+
   const { bg, color } = batchStatusStyle(batch.batchStatus);
   const done       = (batch.orders || []).filter((o) => o.status === 'delivered').length;
   const retryCount = (batch.orders || []).filter((o) => o.status === 'retry_pending').length;
   const total      = (batch.orders || []).length;
   const pct        = total ? Math.round((done / total) * 100) : 0;
 
+  const currentRiderId = typeof batch.riderId === 'object' ? batch.riderId?._id : batch.riderId;
   const riderName = (() => {
     if (!batch.riderId) return null;
     if (typeof batch.riderId === 'object' && batch.riderId.name) return batch.riderId.name;
-    const id = typeof batch.riderId === 'object' ? batch.riderId._id : batch.riderId;
-    return riders.find((r) => String(r._id) === String(id))?.name || 'Assigned';
+    return riders.find((r) => String(r._id) === String(currentRiderId))?.name || 'Assigned';
   })();
 
   const handleAssign = async (riderId) => {
@@ -647,6 +652,18 @@ const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
     setAssigning(true);
     try { await onAssign(batch._id, riderId); }
     finally { setAssigning(false); }
+  };
+
+  const handleMove = async (orderId) => {
+    const targetRiderId = moveTargets[orderId];
+    if (!targetRiderId || !onMoveOrder) return;
+    setMovingOrder((prev) => ({ ...prev, [orderId]: true }));
+    try {
+      await onMoveOrder(orderId, targetRiderId, batch.mealSlot, batch.batchDate);
+      setMoveTargets((prev) => ({ ...prev, [orderId]: '' }));
+    } finally {
+      setMovingOrder((prev) => ({ ...prev, [orderId]: false }));
+    }
   };
 
   return (
@@ -664,10 +681,10 @@ const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
             {total} orders · {done} delivered
             {retryCount > 0 && (
               <span style={{ color: '#EA580C', marginLeft: 8, fontWeight: 700 }}>
-                ·  {retryCount} retry pending
+                · ↺ {retryCount} retry pending
               </span>
             )}
-            {riderName && <span style={{ color: C.blue, marginLeft: 8 }}>·  {riderName}</span>}
+            {riderName && <span style={{ color: C.blue, marginLeft: 8 }}>· 👤 {riderName}</span>}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -692,7 +709,7 @@ const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
             onChange={(e) => setSelectedRiderId(e.target.value)}
           >
             <option value="" disabled>{assigning ? 'Assigning…' : (batch.riderId ? 'Reassign rider…' : 'Assign rider…')}</option>
-            {riders.filter((r) => r.isActive !== false && r.isAvailable !== false).map((r) => (
+            {riders.filter((r) => r.isActive !== false).map((r) => (
               <option key={r._id} value={r._id}>{r.name}</option>
             ))}
           </select>
@@ -718,10 +735,14 @@ const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
             (batch.orders || []).map((order, idx) => {
               const { bg: oBg, color: oColor } = orderStatusStyle(order.status);
               const addr = order.address || {};
+              const isMovable = !['picked_up', 'on_the_way', 'delivered', 'failed'].includes(order.status);
+              const isMoving = movingOrder[order.orderId];
+              const tooltipText = !isMovable ? `Cannot move stop while status is ${order.status}` : '';
+
               return (
                 <div key={order.orderId || idx} style={{
                   display: 'flex', gap: 12, alignItems: 'flex-start',
-                  padding: '10px 0', borderBottom: idx < batch.orders.length - 1 ? `1px solid ${C.border}` : 'none',
+                  padding: '12px 0', borderBottom: idx < batch.orders.length - 1 ? `1px solid ${C.border}` : 'none',
                 }}>
                   {/* Sequence circle */}
                   <div style={{
@@ -736,25 +757,82 @@ const DetailedBatchCard = ({ batch, riders = [], onAssign }) => {
                   }}>
                     {order.status === 'retry_pending' ? '↺' : (order.sequence || idx + 1)}
                   </div>
+
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: '#1E293B' }}>
-                      {order.customerName || `Customer #${idx + 1}`}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 6 }}>
+                      <div>
+                        <span style={{ fontWeight: 600, fontSize: 13, color: '#1E293B' }}>
+                          {order.customerName || `Customer #${idx + 1}`}
+                        </span>
+                        {order.phone && (
+                          <a href={`tel:${order.phone}`} style={{ fontSize: 12, color: C.blue, textDecoration: 'none', marginLeft: 8 }}>
+                            📞 {order.phone}
+                          </a>
+                        )}
+                      </div>
+                      <Badge label={order.status === 'retry_pending' ? '🔄 Retry' : (order.status || 'pending')} bg={oBg} color={oColor} />
                     </div>
-                    <div style={{ fontSize: 12, color: C.slate, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+
+                    <div style={{ fontSize: 12, color: C.slate, marginTop: 2 }}>
                       {[addr.flatHouseNo, addr.street, addr.area].filter(Boolean).join(', ') || addr.fullAddress || 'Address not available'}
                     </div>
-                    {order.phone && (
-                      <a href={`tel:${order.phone}`} style={{ fontSize: 12, color: C.blue, textDecoration: 'none' }}>
-                        📞 {order.phone}
-                      </a>
-                    )}
+
+                    {/* Payment chip & Rider info */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
+                        background: order.paymentStatus === 'Paid' ? '#DCFCE7' : '#FEF3C7',
+                        color: order.paymentStatus === 'Paid' ? '#166534' : '#92400E',
+                        border: `1px solid ${order.paymentStatus === 'Paid' ? '#86EFAC' : '#FDE68A'}`
+                      }}>
+                        {order.paymentMethod || 'Cash'} · {order.paymentStatus || 'Pending'} {order.amount ? `· ₹${order.amount}` : ''}
+                      </span>
+                      {riderName && (
+                        <span style={{ fontSize: 11, color: C.slate }}>
+                          👤 <strong>{riderName}</strong>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Per-order move control */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 8 }} title={tooltipText}>
+                      <select
+                        value={moveTargets[order.orderId] || ''}
+                        disabled={!isMovable || isMoving}
+                        onChange={(e) => setMoveTargets((prev) => ({ ...prev, [order.orderId]: e.target.value }))}
+                        style={{
+                          padding: '4px 8px', borderRadius: 6, border: `1px solid ${C.border}`,
+                          fontSize: 12, background: !isMovable ? '#F1F5F9' : '#fff',
+                          cursor: !isMovable ? 'not-allowed' : 'pointer', minWidth: 140
+                        }}
+                      >
+                        <option value="">Move stop to…</option>
+                        {riders.filter((r) => r.isActive !== false && String(r._id) !== String(currentRiderId)).map((r) => (
+                          <option key={r._id} value={r._id}>{r.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={!isMovable || isMoving || !moveTargets[order.orderId]}
+                        onClick={() => handleMove(order.orderId)}
+                        style={{
+                          padding: '4px 12px', borderRadius: 6, border: 'none',
+                          background: !isMovable || !moveTargets[order.orderId] ? '#CBD5E1' : C.blue,
+                          color: '#fff', fontSize: 12, fontWeight: 600,
+                          cursor: !isMovable || !moveTargets[order.orderId] || isMoving ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {isMoving ? 'Moving…' : 'Move'}
+                      </button>
+                    </div>
+
                     {order.status === 'retry_pending' && order.failReason && (
                       <div style={{ fontSize: 11, color: '#EA580C', marginTop: 3 }}>
-                         {order.failReason} · attempt {order.retryCount || 1}/2
+                        ⚠️ {order.failReason} · attempt {order.retryCount || 1}/2
                       </div>
                     )}
                   </div>
-                  <Badge label={order.status === 'retry_pending' ? '🔄 Retry' : (order.status || 'pending')} bg={oBg} color={oColor} />
+
                   {order.proofPhotoUrl && (
                     <button
                       title="View delivery proof photo"
@@ -1073,13 +1151,35 @@ const BatchesTab = ({ riders = [] }) => {
   const [loading, setLoading]       = useState(false);
   const [creating, setCreating]     = useState(false);
   const [msg, setMsg]               = useState({ text: '', ok: true });
-  const [pendingOrders, setPending]     = useState(null);
   const [newOrderAlert, setNewOrderAlert] = useState(0); // new orders arrived since last batch
   const [retryOrders, setRetryOrders]   = useState([]);
   const [retryExpanded, setRetryExpanded] = useState(false);
   const [failedOrders, setFailedOrders]   = useState([]);
   const [failedExpanded, setFailedExpanded] = useState(false);
   const [resolvingOrder, setResolvingOrder] = useState({}); // { [orderId]: true }
+
+  // WP-4: Unbatched orders and auto-create options
+  const [unbatchedData, setUnbatchedData] = useState(null);
+  const [unbatchedLoading, setUnbatchedLoading] = useState(false);
+  const [selectedUnbatchedIds, setSelectedUnbatchedIds] = useState([]);
+  const [bulkAssignRiderId, setBulkAssignRiderId] = useState('');
+  const [assigningOrders, setAssigningOrders] = useState(false);
+  const [assignMode, setAssignMode] = useState('auto'); // 'auto' | 'rider' | 'unassigned'
+  const [createRiderId, setCreateRiderId] = useState('');
+  const [explainData, setExplainData] = useState(null);
+
+  // Rider load for current slot
+  const riderStopCounts = useMemo(() => {
+    const counts = {};
+    (riders || []).forEach((r) => { counts[String(r._id)] = 0; });
+    (batches || []).forEach((b) => {
+      const rid = typeof b.riderId === 'object' ? b.riderId?._id : b.riderId;
+      if (rid) {
+        counts[String(rid)] = (counts[String(rid)] || 0) + (b.orders?.length || 0);
+      }
+    });
+    return counts;
+  }, [batches, riders]);
 
   const fetchBatches = useCallback(async () => {
     setLoading(true); setMsg({ text: '', ok: true });
@@ -1093,22 +1193,24 @@ const BatchesTab = ({ riders = [] }) => {
     }
   }, [date, mealSlot]);
 
-  // Also fetch today's orders count to show preview
-  const fetchPendingCount = useCallback(async () => {
+  const fetchUnbatched = useCallback(async () => {
+    setUnbatchedLoading(true);
     try {
-      const res = await getTodayOrders();
-      const count = Array.isArray(res) ? res.length : (res?.total ?? res?.orders?.length ?? null);
-      setPending(count);
+      const res = await getUnbatchedOrders(date, mealSlot);
+      setUnbatchedData(res);
+      setSelectedUnbatchedIds([]);
     } catch {
-      setPending(null);
+      setUnbatchedData(null);
+    } finally {
+      setUnbatchedLoading(false);
     }
-  }, []);
+  }, [date, mealSlot]);
 
   useEffect(() => {
     fetchBatches();
-    if (date === todayStr()) fetchPendingCount();
-    else setPending(null);
-  }, [fetchBatches, fetchPendingCount, date]);
+    fetchUnbatched();
+    setExplainData(null);
+  }, [fetchBatches, fetchUnbatched, date, mealSlot]);
 
   useEffect(() => {
     getRetryOrders().then((res) => {
@@ -1124,26 +1226,49 @@ const BatchesTab = ({ riders = [] }) => {
     const handler = () => {
       if (date === todayStr()) {
         setNewOrderAlert((n) => n + 1);
-        fetchPendingCount();
+        fetchBatches();
+        fetchUnbatched();
       }
     };
     onEvent('new_order_placed', handler);
     return () => offEvent('new_order_placed', handler);
-  }, [date, fetchPendingCount]);
+  }, [date, fetchBatches, fetchUnbatched]);
 
   const handleAutoCreate = async () => {
-    setCreating(true); setMsg({ text: '', ok: true });
+    if (assignMode === 'rider' && !createRiderId) {
+      setMsg({ text: 'Please select a rider to assign.', ok: false });
+      return;
+    }
+    setCreating(true); setMsg({ text: '', ok: true }); setExplainData(null);
     try {
-      // Send batchDate (what backend expects) alongside legacy `date` key
-      const res = await createDeliveryBatches({ batchDate: date, date, mealSlot });
+      const payload = {
+        batchDate: date,
+        date,
+        mealSlot,
+        assignMode,
+        riderId: assignMode === 'rider' ? createRiderId : undefined,
+      };
+      const res = await createDeliveryBatches(payload);
       const count = res?.batches?.length ?? res?.batchCount ?? 0;
       if (count === 0) {
-        setMsg({ text: ' No active orders found for this date. Make sure orders exist and are not already batched.', ok: false });
+        setExplainData({
+          hint: res?.hint || null,
+          reasons: res?.reasons || null,
+        });
+        setMsg({
+          text: res?.hint || res?.message || 'No active orders found for this date. Make sure orders exist and are not already batched.',
+          ok: false,
+        });
       } else {
-        setMsg({ text: ` ${count} batch${count !== 1 ? 'es' : ''} created successfully!`, ok: true });
+        const riderSummary = (res?.assignments || [])
+          .map((a) => `${a.riderName || 'Unassigned'}: ${a.orderCount} orders`)
+          .join(', ');
+        setMsg({
+          text: ` ${count} batch${count !== 1 ? 'es' : ''} created successfully! ${riderSummary ? `(${riderSummary})` : ''}`,
+          ok: true,
+        });
         setNewOrderAlert(0);
-        fetchBatches();
-        fetchPendingCount();
+        await Promise.all([fetchBatches(), fetchUnbatched()]);
       }
     } catch (e) {
       setMsg({ text: ' ' + (e.message || 'Create failed'), ok: false });
@@ -1155,10 +1280,63 @@ const BatchesTab = ({ riders = [] }) => {
   const handleAssign = async (batchId, riderId) => {
     try {
       await assignBatchToRider(batchId, riderId);
-      await fetchBatches();
+      await Promise.all([fetchBatches(), fetchUnbatched()]);
       addToast('Rider assigned successfully.', 'success');
     } catch (e) {
       addToast('Assign failed: ' + e.message, 'error');
+    }
+  };
+
+  const handleMoveOrder = async (orderId, targetRiderId, slot = mealSlot, bDate = date) => {
+    try {
+      const res = await assignOrdersToRider({
+        orderIds: [orderId],
+        riderId: targetRiderId,
+        mealSlot: slot,
+        date: bDate,
+      });
+      const r = res?.results?.[0];
+      if (r && !r.ok) {
+        addToast(r.message || 'Failed to move order', 'error');
+      } else {
+        addToast('Order moved successfully!', 'success');
+      }
+      await Promise.all([fetchBatches(), fetchUnbatched()]);
+    } catch (e) {
+      addToast('Move failed: ' + (e.message || 'Unknown error'), 'error');
+    }
+  };
+
+  const handleBulkAssignUnbatched = async () => {
+    if (!bulkAssignRiderId) {
+      addToast('Please select a rider first', 'error');
+      return;
+    }
+    if (selectedUnbatchedIds.length === 0) {
+      addToast('Please select at least one order', 'error');
+      return;
+    }
+    setAssigningOrders(true);
+    try {
+      const res = await assignOrdersToRider({
+        orderIds: selectedUnbatchedIds,
+        riderId: bulkAssignRiderId,
+        mealSlot,
+        date,
+      });
+      const moved = res?.movedCount || 0;
+      const failed = res?.failedCount || 0;
+      if (moved > 0) {
+        addToast(`Assigned ${moved} order${moved > 1 ? 's' : ''} to rider!${failed > 0 ? ` (${failed} failed)` : ''}`, 'success');
+      } else if (failed > 0) {
+        addToast(`Assignment failed for ${failed} order${failed > 1 ? 's' : ''}`, 'error');
+      }
+      setSelectedUnbatchedIds([]);
+      await Promise.all([fetchBatches(), fetchUnbatched()]);
+    } catch (e) {
+      addToast('Assignment failed: ' + (e.message || 'Unknown error'), 'error');
+    } finally {
+      setAssigningOrders(false);
     }
   };
 
@@ -1181,6 +1359,13 @@ const BatchesTab = ({ riders = [] }) => {
   };
 
   const isToday = date === todayStr();
+  const unbatchedOrders = unbatchedData?.orders || [];
+  const unbatchedCount = unbatchedOrders.length;
+  const batchedCount = batches.reduce((sum, b) => sum + (b.orders?.length || 0), 0);
+  const startsLaterList = unbatchedData?.reasons?.startsLater || explainData?.reasons?.startsLater || [];
+  const queuedPendingList = unbatchedData?.reasons?.queuedPending || explainData?.reasons?.queuedPending || [];
+  const earliestStartsLater = startsLaterList[0]?.startDate;
+  const earliestDateStr = earliestStartsLater ? new Date(earliestStartsLater).toISOString().split('T')[0] : null;
 
   return (
     <div>
@@ -1189,14 +1374,13 @@ const BatchesTab = ({ riders = [] }) => {
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: '0 0 auto' }}>
             <label style={{ fontSize: 12, fontWeight: 600, color: C.slate, display: 'block', marginBottom: 4 }}>
-              Date {date !== todayStr() && <span style={{ color: C.blue, fontWeight: 700 }}>📋 View only</span>}
+              Date {!isToday && <span style={{ color: C.blue, fontWeight: 700 }}>📋 {date > todayStr() ? 'Upcoming' : 'Past'}</span>}
             </label>
             <input
               type="date"
               value={date}
-              max={todayStr()}
               onChange={(e) => setDate(e.target.value)}
-              style={{ ...inputSt, width: 160 }}
+              style={{ ...inputSt, width: 150 }}
             />
           </div>
           <div style={{ flex: '0 0 auto' }}>
@@ -1206,20 +1390,91 @@ const BatchesTab = ({ riders = [] }) => {
               <option value="dinner"> Dinner</option>
             </select>
           </div>
-          <Btn onClick={fetchBatches} outline color={C.blue}> Fetch</Btn>
-          <Btn onClick={handleAutoCreate} disabled={creating || date !== todayStr()} color={C.orange}
-            title={date !== todayStr() ? 'Batches can only be created for today' : ''}>
+          <div style={{ flex: '0 0 auto' }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: C.slate, display: 'block', marginBottom: 4 }}>Assign Mode</label>
+            <select value={assignMode} onChange={(e) => setAssignMode(e.target.value)} style={{ ...inputSt, width: 160 }}>
+              <option value="auto">Auto (Balanced)</option>
+              <option value="rider">Specific Rider</option>
+              <option value="unassigned">Leave Unassigned</option>
+            </select>
+          </div>
+          {assignMode === 'rider' && (
+            <div style={{ flex: '0 0 auto' }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: C.slate, display: 'block', marginBottom: 4 }}>Select Rider</label>
+              <select value={createRiderId} onChange={(e) => setCreateRiderId(e.target.value)} style={{ ...inputSt, width: 170 }}>
+                <option value="">Choose rider…</option>
+                {riders.filter((r) => r.isActive !== false).map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name} ({riderStopCounts[String(r._id)] || 0} stops)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Btn onClick={() => { fetchBatches(); fetchUnbatched(); }} disabled={loading || unbatchedLoading} outline color={C.blue}>
+            {loading || unbatchedLoading ? 'Loading…' : ' Fetch'}
+          </Btn>
+          <Btn onClick={handleAutoCreate} disabled={creating} color={C.orange}>
             {creating ? 'Creating…' : ' Auto-Create Batches'}
           </Btn>
         </div>
 
-        {/* Past date notice */}
-        {!isToday && (
+        {/* Selected date & slot orders count summary */}
+        <div style={{
+          marginTop: 12, padding: '10px 14px', borderRadius: 8,
+          background: unbatchedCount > 0 ? C.blueLight : C.slateLight,
+          border: `1px solid ${unbatchedCount > 0 ? '#BFDBFE' : C.border}`,
+          fontSize: 13,
+          color: unbatchedCount > 0 ? C.blue : C.slate,
+        }}>
+          <strong>📅 {date} ({mealSlot.toUpperCase()}) Status: </strong>
+          <span>{unbatchedCount} eligible unbatched · {batchedCount} batched</span>
+          {startsLaterList.length > 0 && (
+            <span style={{ color: '#C2410C', fontWeight: 600, marginLeft: 8 }}>
+              · {startsLaterList.length} start{startsLaterList.length === 1 ? 's' : ''} later
+            </span>
+          )}
+          {queuedPendingList.length > 0 && (
+            <span style={{ color: '#7C3AED', fontWeight: 600, marginLeft: 8 }}>
+              · {queuedPendingList.length} queued pending
+            </span>
+          )}
+        </div>
+
+        {/* Explanatory banner with Go to Date button */}
+        {(explainData?.hint || (startsLaterList.length > 0 && unbatchedCount === 0 && batches.length === 0)) && (
           <div style={{
-            marginTop: 12, padding: '10px 14px', borderRadius: 8,
-            background: '#FFF7ED', border: `1px solid #FED7AA`, fontSize: 13, color: '#C2410C',
+            marginTop: 12, padding: '12px 16px', borderRadius: 8,
+            background: '#FFF7ED', border: '1px solid #FED7AA',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10
           }}>
-             Viewing past batches — Auto-Create is only available for today's date.
+            <div style={{ fontSize: 13, color: '#9A3412', flex: 1, minWidth: 260 }}>
+              <strong>ℹ️ Note for {date} ({mealSlot}):</strong>
+              <div style={{ marginTop: 4 }}>
+                {explainData?.hint || `No active orders found for this date. Orders may start on upcoming dates.`}
+              </div>
+              {startsLaterList.length > 0 && (
+                <div style={{ marginTop: 4, fontSize: 12, color: '#C2410C' }}>
+                  Next upcoming order: {startsLaterList[0].customerName || 'Customer'} starts on {new Date(startsLaterList[0].startDate).toLocaleDateString('en-GB')}.
+                </div>
+              )}
+            </div>
+            {earliestDateStr && earliestDateStr !== date && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(earliestDateStr);
+                  setExplainData(null);
+                }}
+                style={{
+                  padding: '7px 15px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: C.orange, color: '#fff', fontSize: 12, fontWeight: 700,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)', whiteSpace: 'nowrap'
+                }}
+              >
+                Go to {earliestDateStr} →
+              </button>
+            )}
           </div>
         )}
 
@@ -1244,27 +1499,162 @@ const BatchesTab = ({ riders = [] }) => {
           </div>
         )}
 
-        {/* Today's unbatched orders count — always visible when on today's view */}
-        {isToday && pendingOrders !== null && (
-          <div style={{
-            marginTop: 12, padding: '10px 14px', borderRadius: 8,
-            background: pendingOrders > 0 ? C.blueLight : C.slateLight,
-            border: `1px solid ${pendingOrders > 0 ? '#BFDBFE' : C.border}`,
-            fontSize: 13,
-            color: pendingOrders > 0 ? C.blue : C.slate,
-          }}>
-            {pendingOrders > 0
-              ? ` ${pendingOrders} active order${pendingOrders !== 1 ? 's' : ''} for today (${batches.length > 0 ? 'some may already be batched' : 'not yet batched'}).`
-              : ' No active orders found for today yet.'}
-          </div>
-        )}
-
         {msg.text && (
           <p style={{ margin: '10px 0 0', fontSize: 13, color: msg.ok ? C.green : C.red }}>
             {msg.text}
           </p>
         )}
       </Card>
+
+      {/* WP-4: Unbatched orders panel */}
+      {unbatchedOrders.length > 0 && (
+        <Card style={{ marginBottom: 16, border: '1px solid #E2E8F0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>📋 Unbatched Orders ({unbatchedOrders.length})</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: C.slate }}>
+                  Ready for {date} ({mealSlot})
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: C.slate, marginTop: 2 }}>
+                Assign individually or select multiple orders to assign to a rider
+              </div>
+            </div>
+
+            {/* Bulk assignment controls */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <select
+                value={bulkAssignRiderId}
+                onChange={(e) => setBulkAssignRiderId(e.target.value)}
+                disabled={assigningOrders}
+                style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 13, minWidth: 160 }}
+              >
+                <option value="">Select rider to assign…</option>
+                {riders.filter((r) => r.isActive !== false).map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name} ({riderStopCounts[String(r._id)] || 0} stops)
+                  </option>
+                ))}
+              </select>
+              <Btn
+                small
+                disabled={assigningOrders || selectedUnbatchedIds.length === 0 || !bulkAssignRiderId}
+                onClick={handleBulkAssignUnbatched}
+                color={C.orange}
+              >
+                {assigningOrders ? 'Assigning…' : `Assign Selected (${selectedUnbatchedIds.length})`}
+              </Btn>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: `2px solid ${C.border}`, textAlign: 'left', color: C.slate, fontSize: 12 }}>
+                  <th style={{ padding: '8px 10px', width: 40 }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedUnbatchedIds.length === unbatchedOrders.length && unbatchedOrders.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedUnbatchedIds(unbatchedOrders.map((o) => o.orderId));
+                        else setSelectedUnbatchedIds([]);
+                      }}
+                    />
+                  </th>
+                  <th style={{ padding: '8px 10px' }}>Customer</th>
+                  <th style={{ padding: '8px 10px' }}>Area / Pincode</th>
+                  <th style={{ padding: '8px 10px' }}>Plan</th>
+                  <th style={{ padding: '8px 10px' }}>Payment</th>
+                  <th style={{ padding: '8px 10px' }}>Amount</th>
+                  <th style={{ padding: '8px 10px', textAlign: 'right' }}>Quick Assign</th>
+                </tr>
+              </thead>
+              <tbody>
+                {unbatchedOrders.map((o) => {
+                  const isSelected = selectedUnbatchedIds.includes(o.orderId);
+                  return (
+                    <tr key={o.orderId} style={{ borderBottom: `1px solid ${C.border}`, background: isSelected ? '#F8FAFC' : 'transparent' }}>
+                      <td style={{ padding: '10px' }}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedUnbatchedIds((prev) => [...prev, o.orderId]);
+                            else setSelectedUnbatchedIds((prev) => prev.filter((id) => id !== o.orderId));
+                          }}
+                        />
+                      </td>
+                      <td style={{ padding: '10px' }}>
+                        <div style={{ fontWeight: 600, color: '#1E293B' }}>{o.customerName}</div>
+                        {o.phone && <div style={{ fontSize: 12, color: C.slate }}>📞 {o.phone}</div>}
+                      </td>
+                      <td style={{ padding: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span>{o.area || o.pincode ? `${o.area} (${o.pincode})` : 'No area specified'}</span>
+                          {!o.hasCoordinates && (
+                            <span
+                              title="no GPS location; delivery will be blocked until the address has coordinates"
+                              style={{ cursor: 'help', fontSize: 14 }}
+                            >
+                              ⚠️
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{ padding: '10px' }}>
+                        <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{o.planType}</span>
+                      </td>
+                      <td style={{ padding: '10px' }}>
+                        <span style={{
+                          fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
+                          background: o.paymentStatus === 'Paid' ? '#DCFCE7' : '#FEF3C7',
+                          color: o.paymentStatus === 'Paid' ? '#166534' : '#92400E',
+                          border: `1px solid ${o.paymentStatus === 'Paid' ? '#86EFAC' : '#FDE68A'}`
+                        }}>
+                          {o.paymentMethod || 'Cash'} · {o.paymentStatus}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px', fontWeight: 600 }}>
+                        ₹{o.amount}
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'right' }}>
+                        <select
+                          disabled={assigningOrders}
+                          onChange={async (e) => {
+                            const rid = e.target.value;
+                            if (!rid) return;
+                            setAssigningOrders(true);
+                            try {
+                              await assignOrdersToRider({ orderIds: [o.orderId], riderId: rid, mealSlot, date });
+                              addToast(`Assigned order to rider`, 'success');
+                              await Promise.all([fetchBatches(), fetchUnbatched()]);
+                            } catch (err) {
+                              addToast('Assign failed: ' + err.message, 'error');
+                            } finally {
+                              setAssigningOrders(false);
+                            }
+                          }}
+                          defaultValue=""
+                          style={{ padding: '4px 8px', borderRadius: 6, border: `1px solid ${C.border}`, fontSize: 12 }}
+                        >
+                          <option value="" disabled>Assign to…</option>
+                          {riders.filter((r) => r.isActive !== false).map((r) => (
+                            <option key={r._id} value={r._id}>
+                              {r.name} ({riderStopCounts[String(r._id)] || 0})
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
 
       {/* Retry queue banner */}
       {retryOrders.length > 0 && (
@@ -1428,7 +1818,7 @@ const BatchesTab = ({ riders = [] }) => {
             No batches created yet for this date.
           </p>
           <p style={{ color: C.slate, fontSize: 12 }}>
-            Click <strong style={{ color: C.orange }}> Auto-Create Batches</strong> above to group today's active orders by area.
+            Click <strong style={{ color: C.orange }}> Auto-Create Batches</strong> above to group active orders by area or assign unbatched orders below.
           </p>
         </Card>
       ) : (
@@ -1437,7 +1827,13 @@ const BatchesTab = ({ riders = [] }) => {
             {batches.length} batch{batches.length !== 1 ? 'es' : ''} · {batches.reduce((s, b) => s + (b.orders?.length || 0), 0)} total orders
           </p>
           {batches.map((b) => (
-            <DetailedBatchCard key={b._id} batch={b} riders={riders} onAssign={handleAssign} />
+            <DetailedBatchCard
+              key={b._id}
+              batch={b}
+              riders={riders}
+              onAssign={handleAssign}
+              onMoveOrder={handleMoveOrder}
+            />
           ))}
         </div>
       )}

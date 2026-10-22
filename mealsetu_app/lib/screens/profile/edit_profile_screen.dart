@@ -171,6 +171,197 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // ── Location permission dialog ───────────────────────────────────────────
+
+  Future<void> _showLocationPermissionDialog() async {
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.location_off_rounded, color: Colors.orange.shade700, size: 24),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Location Permission Required',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'We need location access to find vendors near you. Please allow location in settings.',
+          style: TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Enter Manually', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Geolocator.openAppSettings();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Open Settings', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Location verification popup ───────────────────────────────────────────
+
+  Future<void> _showLocationVerificationDialog({
+    required String area,
+    required String city,
+    required String pincode,
+    required String fullAddress,
+    required String street,
+    required String flatHouseNo,
+    required double lat,
+    required double lng,
+  }) async {
+    if (!mounted) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  const Text('📍', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Confirm Your Location',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    _locationDetailRow('Area:', area.isNotEmpty ? area : '—', isDark),
+                    const SizedBox(height: 8),
+                    _locationDetailRow('City:', city.isNotEmpty ? city : '—', isDark),
+                    const SizedBox(height: 8),
+                    _locationDetailRow('Pincode:', pincode.isNotEmpty ? pincode : '—', isDark),
+                    const SizedBox(height: 8),
+                    _locationDetailRow('Full:', fullAddress.isNotEmpty ? fullAddress : '—', isDark),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('✏️ Edit Manually', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        if (flatHouseNo.isNotEmpty && _flatCtrl.text.isEmpty) {
+                          _flatCtrl.text = flatHouseNo;
+                        }
+                        if (street.isNotEmpty) _streetCtrl.text = street;
+                        if (area.isNotEmpty) _areaCtrl.text = area;
+                        if (city.isNotEmpty) _cityCtrl.text = city;
+                        if (pincode.isNotEmpty) _pincodeCtrl.text = pincode;
+                        _detectedLat = lat;
+                        _detectedLng = lng;
+                        setState(() => _locationDetected = true);
+                        _snack('Location confirmed! All fields remain editable anytime.', isSuccess: true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('✅ Confirm & Use This', style: TextStyle(fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _locationDetailRow(String label, String value, bool isDark) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 70,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   // ── GPS detect ────────────────────────────────────────────────────────────
 
   Future<void> _detectLocation() async {
@@ -182,40 +373,121 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
       if (perm == LocationPermission.denied) {
-        _snack('Location permission denied', isError: true);
+        await _showLocationPermissionDialog();
         return;
       }
     }
     if (perm == LocationPermission.deniedForever) {
-      _snack('Enable location access in phone Settings', isError: true);
+      await _showLocationPermissionDialog();
       return;
     }
 
     setState(() => _isDetecting = true);
+    _snack('Fetching your location...');
+
     try {
       // ignore: deprecated_member_use
       final pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 15),
       );
-      _detectedLat = pos.latitude;
-      _detectedLng = pos.longitude;
-      final marks = await placemarkFromCoordinates(pos.latitude, pos.longitude);
-      if (marks.isNotEmpty && mounted) {
-        final p = marks.first;
-        if ((p.street ?? '').isNotEmpty)      _streetCtrl.text  = p.street!;
-        if ((p.subLocality ?? p.locality ?? '').isNotEmpty) _areaCtrl.text = p.subLocality ?? p.locality!;
-        if ((p.locality ?? '').isNotEmpty)    _cityCtrl.text    = p.locality!;
-        if ((p.postalCode ?? '').isNotEmpty)  _pincodeCtrl.text = p.postalCode!;
-        setState(() { _locationDetected = true; _isDetecting = false; });
-        _snack('Location found. Available address details were filled; complete any missing fields before saving.', isSuccess: true);
-      } else {
-        setState(() => _isDetecting = false);
-        _snack('Location not found. Please fill manually.');
+      final lat = pos.latitude;
+      final lng = pos.longitude;
+
+      String street = '', area = '', city = '', pincode = '', flatHouseNo = '', fullAddress = '';
+
+      // Try backend reverse geocode
+      try {
+        final geoUri = Uri.parse(
+          '${ApiService().baseUrl}/maps/geocode/reverse?lat=$lat&lng=$lng',
+        );
+        final geoRes = await http.get(geoUri).timeout(const Duration(seconds: 6));
+        if (geoRes.statusCode == 200) {
+          final geoData = jsonDecode(geoRes.body) as Map<String, dynamic>;
+          final results = (geoData['results'] as List<dynamic>? ?? []);
+          if (results.isNotEmpty) {
+            fullAddress = results[0]['formatted_address'] as String? ?? '';
+            final comps = ((results[0] as Map)['address_components'] as List<dynamic>? ?? [])
+                .cast<Map<String, dynamic>>();
+            for (final c in comps) {
+              final types = (c['types'] as List<dynamic>).cast<String>();
+              final name  = c['long_name'] as String? ?? '';
+              if (types.contains('street_number')) {
+                flatHouseNo = name;
+              } else if (types.contains('route') || types.contains('premise')) {
+                street = name;
+              } else if (types.contains('sublocality_level_1') || types.contains('sublocality')) {
+                area = name;
+              } else if (types.contains('locality')) {
+                city = name;
+              } else if (types.contains('postal_code')) {
+                pincode = name;
+              }
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Fallback: Placemark from coordinates
+      if (area.isEmpty || city.isEmpty || pincode.isEmpty) {
+        try {
+          final marks = await placemarkFromCoordinates(lat, lng);
+          if (marks.isNotEmpty) {
+            final p = marks.first;
+            if (street.isEmpty && (p.street ?? '').isNotEmpty) street = p.street!;
+            if (area.isEmpty && (p.subLocality ?? p.locality ?? '').isNotEmpty) {
+              area = p.subLocality ?? p.locality!;
+            }
+            if (city.isEmpty && (p.locality ?? '').isNotEmpty) city = p.locality!;
+            if (pincode.isEmpty && (p.postalCode ?? '').isNotEmpty) pincode = p.postalCode!;
+          }
+        } catch (_) {}
       }
+
+      // Fallback: Nominatim API if fields are still missing
+      if (area.isEmpty || city.isEmpty || pincode.isEmpty) {
+        try {
+          final nomUri = Uri.parse('https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lng&format=json');
+          final nomRes = await http.get(nomUri, headers: {'User-Agent': 'MealSetu/1.0'}).timeout(const Duration(seconds: 5));
+          if (nomRes.statusCode == 200) {
+            final nomData = jsonDecode(nomRes.body) as Map<String, dynamic>;
+            final addr = (nomData['address'] as Map<String, dynamic>? ?? {});
+            if (fullAddress.isEmpty) fullAddress = nomData['display_name'] as String? ?? '';
+            if (flatHouseNo.isEmpty) flatHouseNo = addr['house_number'] as String? ?? '';
+            if (street.isEmpty) street = addr['road'] as String? ?? '';
+            if (area.isEmpty) area = addr['suburb'] as String? ?? addr['neighbourhood'] as String? ?? addr['residential'] as String? ?? '';
+            if (city.isEmpty) city = addr['city'] as String? ?? addr['town'] as String? ?? addr['village'] as String? ?? addr['county'] as String? ?? '';
+            if (pincode.isEmpty) pincode = addr['postcode'] as String? ?? '';
+          }
+        } catch (_) {}
+      }
+
+      if (area.isEmpty) area = city;
+      if (fullAddress.isEmpty) {
+        fullAddress = [flatHouseNo, street, area, city, pincode].where((s) => s.isNotEmpty).join(', ');
+      }
+
+      setState(() => _isDetecting = false);
+
+      if (area.isEmpty && city.isEmpty && pincode.isEmpty) {
+        _snack('Could not fetch address details. Please enter manually.');
+        return;
+      }
+
+      // Show confirmation popup before saving
+      await _showLocationVerificationDialog(
+        area: area,
+        city: city,
+        pincode: pincode,
+        fullAddress: fullAddress,
+        street: street,
+        flatHouseNo: flatHouseNo,
+        lat: lat,
+        lng: lng,
+      );
     } catch (e) {
       setState(() => _isDetecting = false);
-      _snack('Location error. Try again.', isError: true);
+      _snack('Location error. Please fill manually.', isError: true);
     }
   }
 

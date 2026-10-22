@@ -749,6 +749,15 @@ export const createDeliveryBatches = (data) =>
 export const getDeliveryBatches = (date, mealSlot) =>
   apiCall(`/vendor/delivery/batches?date=${date}&mealSlot=${mealSlot}`, { method: 'GET' });
 
+export const getUnbatchedOrders = (date, mealSlot) =>
+  apiCall(`/vendor/delivery/unbatched-orders?date=${encodeURIComponent(date)}&mealSlot=${encodeURIComponent(mealSlot)}`, { method: 'GET' });
+
+export const assignOrdersToRider = (payload) =>
+  apiCall('/vendor/delivery/orders/assign', {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+
 export const assignBatchToRider = (batchId, riderId) =>
   apiCall(`/vendor/delivery/batches/${batchId}/assign`, {
     method: 'PATCH',

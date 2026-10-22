@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart' show DioException;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -959,11 +960,14 @@ class _OrderDeliveryTile extends StatelessWidget {
       BuildContext context, String orderId, String? name,
       Map<String, dynamic> order) async {
     final isCash = (order['paymentMethod'] as String? ?? '').toLowerCase() == 'cash';
+    final isCashPaid = (order['paymentStatus'] as String? ?? '').toLowerCase() == 'paid' ||
+        order['cashCollected'] == true;
+
     final expectedAmount = (order['amount'] as num?)?.toDouble() ?? 0;
     final amountController = TextEditingController(
       text: expectedAmount > 0 ? expectedAmount.toStringAsFixed(2) : '',
     );
-    var cashCollected = false;
+    var cashCollected = isCashPaid;
     var submitting = false;
     String? errorMessage;
 
@@ -986,23 +990,65 @@ class _OrderDeliveryTile extends StatelessWidget {
                 Text('Mark the meal delivered to ${name ?? 'the customer'}?'),
                 if (isCash) ...[
                   const SizedBox(height: 12),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Cash collected'),
-                    value: cashCollected,
-                    onChanged: submitting
-                        ? null
-                        : (value) => setDialogState(() => cashCollected = value ?? false),
-                  ),
-                  TextField(
-                    controller: amountController,
-                    enabled: !submitting,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Cash amount',
-                      prefixText: '₹ ',
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7ED),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFFED7AA)),
                     ),
-                    onChanged: (_) => setDialogState(() {}),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              '💰 Total Cash to Collect:',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFC2410C),
+                              ),
+                            ),
+                            Text(
+                              '₹${expectedAmount.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFC2410C),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            isCashPaid
+                                ? 'Payment already collected (₹${expectedAmount.toStringAsFixed(0)})'
+                                : 'Payment received from customer (₹${expectedAmount.toStringAsFixed(0)})',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                          value: cashCollected,
+                          activeColor: _kGreen,
+                          onChanged: submitting || isCashPaid
+                              ? null
+                              : (value) => setDialogState(() => cashCollected = value ?? false),
+                        ),
+                        TextField(
+                          controller: amountController,
+                          enabled: !submitting && !isCashPaid,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: const InputDecoration(
+                            isDense: true,
+                            labelText: 'Amount collected',
+                            prefixText: '₹ ',
+                          ),
+                          onChanged: (_) => setDialogState(() {}),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
                 if (errorMessage != null) ...[
@@ -1040,7 +1086,7 @@ class _OrderDeliveryTile extends StatelessWidget {
                             desiredAccuracy: LocationAccuracy.bestForNavigation,
                             timeLimit: const Duration(seconds: 25),
                           );
-                          if (position.isMocked) {
+                          if (position.isMocked && !kIsWeb) {
                             throw Exception('Mocked location is not allowed. Use your device GPS and retry.');
                           }
                           await provider.updateOrderStatus(
@@ -1049,8 +1095,9 @@ class _OrderDeliveryTile extends StatelessWidget {
                             batchId,
                             latitude: position.latitude,
                             longitude: position.longitude,
-                            accuracy: position.accuracy,
-                            isMocked: position.isMocked,
+                            accuracy: kIsWeb ? 20.0 : position.accuracy,
+                            isMocked: kIsWeb ? false : position.isMocked,
+                            isWeb: kIsWeb,
                             cashCollected: isCash ? cashCollected : null,
                             cashAmount: isCash ? amount : null,
                           );
@@ -1455,6 +1502,18 @@ class _OrderDeliveryTile extends StatelessWidget {
                     ),
                   ],
 
+                  // Cash Payment Collection Box
+                  if ((order['paymentMethod'] as String? ?? '').toLowerCase() == 'cash' &&
+                      status != 'delivered' &&
+                      status != 'failed') ...[
+                    const SizedBox(height: 10),
+                    _CashCollectionBox(
+                      order: order,
+                      batchId: batchId,
+                      provider: provider,
+                    ),
+                  ],
+
                   // Action button
                   if ((batchStatus == 'in_progress' ||
                           batchStatus == 'assigned' ||
@@ -1481,6 +1540,154 @@ class _OrderDeliveryTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── Cash collection box for rider ──────────────────────────────────────────
+
+class _CashCollectionBox extends StatefulWidget {
+  const _CashCollectionBox({
+    required this.order,
+    required this.batchId,
+    required this.provider,
+  });
+
+  final Map<String, dynamic> order;
+  final String batchId;
+  final DeliveryProvider provider;
+
+  @override
+  State<_CashCollectionBox> createState() => _CashCollectionBoxState();
+}
+
+class _CashCollectionBoxState extends State<_CashCollectionBox> {
+  bool _isCollecting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    final orderId = order['orderId']?.toString() ?? '';
+    final amount = (order['amount'] as num?)?.toDouble() ?? 0;
+    final isPaid = (order['paymentStatus'] as String? ?? '').toLowerCase() == 'paid' ||
+        order['cashCollected'] == true;
+    final formattedAmount = amount > 0
+        ? (amount.truncateToDouble() == amount ? amount.toInt().toString() : amount.toStringAsFixed(2))
+        : '0';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isPaid ? const Color(0xFFF0FDF4) : const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isPaid ? const Color(0xFFBBF7D0) : const Color(0xFFFDE68A),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '💰 CASH PAYMENT — ₹$formattedAmount',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isPaid ? const Color(0xFF166534) : const Color(0xFF92400E),
+                ),
+              ),
+              const Spacer(),
+              if (_isCollecting)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: _kOrange),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (isPaid)
+            const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: _kGreen, size: 18),
+                SizedBox(width: 6),
+                Text(
+                  'Cash collected',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _kGreen,
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: Checkbox(
+                    value: false,
+                    activeColor: _kGreen,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    onChanged: _isCollecting
+                        ? null
+                        : (val) async {
+                            if (val == true) {
+                              await _markCollected(orderId);
+                            }
+                          },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _isCollecting ? null : () => _markCollected(orderId),
+                    child: const Text(
+                      'Collected cash from customer',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _markCollected(String orderId) async {
+    setState(() => _isCollecting = true);
+    try {
+      await widget.provider.markCashCollected(orderId, widget.batchId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cash collected successfully!'),
+            backgroundColor: _kGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to confirm cash collection: $e'),
+            backgroundColor: _kRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCollecting = false);
+    }
   }
 }
 

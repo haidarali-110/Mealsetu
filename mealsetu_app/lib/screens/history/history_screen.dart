@@ -617,8 +617,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                   const SizedBox(width: 6),
                 ],
-                // ── Download invoice button ──────────────────────────
-                if (orderId.isNotEmpty)
+                // ── Download invoice button (only for paid cash orders or online orders) ──
+                if (orderId.isNotEmpty && (payMethod.toLowerCase() != 'cash' || payStatus.toLowerCase() == 'paid'))
                   _downloading[orderId] == true
                       ? const SizedBox(
                           width: 18,

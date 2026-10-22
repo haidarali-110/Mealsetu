@@ -707,22 +707,86 @@ const addManualCustomer = async (req, res) => {
       return res.status(404).json({ message: 'Vendor not found' });
     }
 
-    const { name, phone, planType, startDate, paymentMethod, amount, deliveryPincode, mealPreference, deliverySlot, address: addressObj } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      planType = 'daily',
+      startDate,
+      paymentMethod = 'Cash',
+      amount,
+      deliveryPincode,
+      mealPreference = 'Regular',
+      deliverySlot,
+      leavesAllowed,
+      address: addressObj,
+      paymentStatus
+    } = req.body;
 
-    // Build structured address — prefer new addressObj, fallback to legacy deliveryPincode
-    const structuredAddress = (addressObj && typeof addressObj === 'object') ? addressObj : null;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Customer full name is required' });
+    }
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+    if (amount === undefined || amount === null || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      return res.status(400).json({ message: 'Valid amount is required' });
+    }
+
+    const normalizedPlan = (planType || '').toLowerCase();
+    const structuredAddress = (addressObj && typeof addressObj === 'object') ? addressObj : {};
     const pincode = structuredAddress?.pincode || deliveryPincode || '';
 
-    const planTypeMapped = planType === 'trial' ? 'Trial' : planType === 'weekly' ? 'Weekly' : planType === 'monthly' ? 'Monthly' : 'Tiffin';
+    let planTypeMapped = 'Daily';
+    let planLeaves = 0;
 
-    const requestedStart = new Date(startDate);
+    if (normalizedPlan === 'daily' || normalizedPlan === 'tiffin') {
+      planTypeMapped = 'Daily';
+      planLeaves = 0;
+    } else if (normalizedPlan === 'weekly') {
+      planTypeMapped = 'Weekly';
+      planLeaves = 0;
+      if (!startDate) {
+        return res.status(400).json({ message: 'Start date is required for Weekly plan' });
+      }
+      if (!mealPreference) {
+        return res.status(400).json({ message: 'Meal preference is required for Weekly plan' });
+      }
+    } else if (normalizedPlan === 'monthly') {
+      planTypeMapped = 'Monthly';
+      planLeaves = leavesAllowed !== undefined ? Number(leavesAllowed) : 2;
+      if (!startDate) {
+        return res.status(400).json({ message: 'Start date is required for Monthly plan' });
+      }
+      if (!mealPreference) {
+        return res.status(400).json({ message: 'Meal preference is required for Monthly plan' });
+      }
+      if (!structuredAddress.area || !structuredAddress.area.trim()) {
+        return res.status(400).json({ message: 'Area / Locality is required for Monthly plan' });
+      }
+      if (!pincode || !pincode.trim()) {
+        return res.status(400).json({ message: 'Pincode is required for Monthly plan' });
+      }
+      if (!structuredAddress.city || !structuredAddress.city.trim()) {
+        return res.status(400).json({ message: 'City is required for Monthly plan' });
+      }
+    } else if (normalizedPlan === 'trial') {
+      planTypeMapped = 'Trial';
+      planLeaves = 0;
+    }
+
+    const requestedStart = startDate ? new Date(startDate) : new Date();
     requestedStart.setUTCHours(0, 0, 0, 0);
 
     const todayMidnight = new Date();
     todayMidnight.setUTCHours(0, 0, 0, 0);
 
     let startDateObj, endDateObj, firstDayMealSlot;
-    if (requestedStart.getTime() === todayMidnight.getTime()) {
+    if (planTypeMapped === 'Daily') {
+      startDateObj     = requestedStart;
+      endDateObj       = new Date(requestedStart); // same day
+      firstDayMealSlot = 'both';
+    } else if (requestedStart.getTime() === todayMidnight.getTime()) {
       // Starting today — apply smart meal timing (same as online users)
       const computed = computeSubscriptionDates(getPlanDurationDays(planTypeMapped));
       startDateObj     = computed.startDate;
@@ -732,12 +796,15 @@ const addManualCustomer = async (req, res) => {
       // Future date — full plan from day 1, both meals
       startDateObj     = requestedStart;
       endDateObj       = new Date(startDateObj);
-      endDateObj.setUTCDate(endDateObj.getUTCDate() + getPlanDurationDays(planTypeMapped));
+      endDateObj.setUTCDate(endDateObj.getUTCDate() + getPlanDurationDays(planTypeMapped) - 1);
       firstDayMealSlot = 'both';
     }
 
-    // STEP 1 — Geocode address via Google Maps if lat/lng not provided
-    let geocodedAddress = structuredAddress ? { ...structuredAddress } : null;
+    // STEP 1 — Geocode address via Google Maps if lat/lng not provided and details exist
+    let geocodedAddress = (structuredAddress && (structuredAddress.area || structuredAddress.pincode || structuredAddress.city))
+      ? { ...structuredAddress }
+      : null;
+
     if (geocodedAddress && (!geocodedAddress.latitude || !geocodedAddress.longitude)) {
       try {
         const q = [geocodedAddress.area, geocodedAddress.city, geocodedAddress.pincode, 'India'].filter(Boolean).join(', ');
@@ -754,7 +821,7 @@ const addManualCustomer = async (req, res) => {
 
     // STEP 2 — Find or create a real User for this manual customer
     let customerId;
-    const existingUser = await User.findOne({ phone });
+    const existingUser = await User.findOne({ phone: phone.trim() });
     if (existingUser) {
       customerId = existingUser._id;
       // Update address if better data is now available and user is a manual customer
@@ -762,41 +829,55 @@ const addManualCustomer = async (req, res) => {
         await User.updateOne({ _id: existingUser._id }, { $set: { address: geocodedAddress, pincode: pincode } });
       }
     } else {
+      const userEmail = email && email.trim() ? email.trim() : `offline_${phone.trim()}@mealsetu.internal`;
       const newUser = await User.create({
-        name,
-        phone,
-        email: `offline_${phone}@mealsetu.internal`,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: userEmail,
         password: await bcrypt.hash(Math.random().toString(36).slice(2), 10),
         role: 'user',
         address: geocodedAddress || (pincode ? { pincode } : {}),
-        pincode,
-        isManualCustomer: true
+        pincode: pincode || undefined,
+        isManualCustomer: true,
+        isVerified: false
       });
       customerId = newUser._id;
     }
+
+    const payStatus = paymentStatus || 'Pending';
 
     // STEP 3 — Create Order using the real userId
     const newOrder = new Order({
       userId: customerId,
       vendorId: vendor._id,
-      customerName: name,
-      manualCustomerName: name,
-      manualCustomerPhone: phone,
+      customerName: name.trim(),
+      manualCustomerName: name.trim(),
+      manualCustomerPhone: phone.trim(),
       manualCustomerAddress: geocodedAddress || undefined,
-      manualCustomerPincode: pincode,
+      manualCustomerPincode: pincode || undefined,
       planType: planTypeMapped,
       startDate: startDateObj,
       endDate: endDateObj,
       status: 'active',
       amount: parseFloat(amount),
-      paymentStatus: 'Paid',
+      paymentStatus: payStatus,
       paymentMethod: paymentMethod || 'Cash',
-      orderStatus: 'Delivered',
+      orderStatus: 'Preparing',
       mealPreference: mealPreference || 'Regular',
       deliverySlot: firstDayMealSlot === 'dinner' ? 'Dinner' : 'Lunch',
       firstDayMealSlot,
       source: 'manual',
-      isManualOrder: true
+      isManualOrder: true,
+      isOfflineOrder: true,
+      leavesAllowed: planLeaves,
+      ...(payStatus === 'Paid' ? {
+        cashPaymentConfirmedAt: new Date(),
+        cashPaymentConfirmedBy: vendor._id,
+        cashPaymentConfirmedByType: 'Vendor',
+        cashCollectedAt: new Date(),
+        cashCollectedBy: vendor._id,
+        cashCollectedByRole: 'vendor'
+      } : {})
     });
 
     await newOrder.save();
@@ -859,7 +940,29 @@ const calculateManualOrderAmount = async (req, res) => {
     const vendor = await Vendor.findOne({ ownerId: req.user._id });
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
+    const normalizedPlan = (planType || '').toLowerCase();
     let days = 0;
+    if (normalizedPlan === 'daily' || normalizedPlan === 'tiffin') {
+      const dailyPricing = await VendorPricing.findOne({
+        vendor_id: vendor._id,
+        plan_type: { $regex: '^daily$', $options: 'i' },
+        is_active: true
+      });
+      const vendorPricingArray = Array.isArray(vendor.pricing) ? vendor.pricing : [];
+      const planPricing = vendorPricingArray.find(
+        p => (p.planType?.toLowerCase() === 'daily' || p.type?.toLowerCase() === 'daily') && p.active === true
+      );
+      const dailyPrice = dailyPricing?.price || planPricing?.price || vendor.dailyPrice || 80;
+      return res.json({
+        amount: dailyPrice,
+        days: 1,
+        dailyPrice,
+        planType: 'Daily',
+        vendorPrice: dailyPrice,
+        startDate: startDate || new Date().toISOString(),
+        source: dailyPricing || planPricing ? 'vendor_pricing' : 'default'
+      });
+    }
     if (planType === 'trial') {
       // 🔥 BUG FIX: Trial uses trialFee OR daily plan price OR 80
       const dailyPricing = await VendorPricing.findOne({
@@ -1652,10 +1755,15 @@ const getCashPayments = async (req, res) => {
       cashPaymentConfirmedAt: order.cashPaymentConfirmedAt || null,
       cashPaymentConfirmedBy: order.cashPaymentConfirmedBy || null,
       cashPaymentConfirmedByType: order.cashPaymentConfirmedByType || null,
+      cashCollectedBy: order.cashCollectedBy || null,
+      cashCollectedAt: order.cashCollectedAt || order.cashPaymentConfirmedAt || null,
+      cashCollectedByRole: order.cashCollectedByRole || (order.cashPaymentConfirmedByType === 'DeliveryPartner' ? 'rider' : order.cashPaymentConfirmedByType === 'Vendor' ? 'vendor' : null),
       cashCollection: order.cashCollection || null,
       startDate: order.startDate,
       endDate: order.endDate,
-      isManualOrder: order.isManualOrder || false
+      source: order.source,
+      isManualOrder: order.isManualOrder || false,
+      isOfflineOrder: order.isOfflineOrder || order.isManualOrder || order.source === 'manual' || false
     }));
 
     res.json({ orders: mapped, pendingCount });
@@ -1686,6 +1794,10 @@ const markCashPaymentPaid = async (req, res) => {
     order.paymentStatus = 'Paid';
     order.cashPaymentConfirmedAt = new Date();
     order.cashPaymentConfirmedBy = vendor._id;
+    order.cashPaymentConfirmedByType = 'Vendor';
+    order.cashCollectedAt = new Date();
+    order.cashCollectedBy = vendor._id;
+    order.cashCollectedByRole = 'vendor';
     await order.save();
 
     const io = req.app.get('io');

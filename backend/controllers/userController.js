@@ -3270,12 +3270,27 @@ const getUserOrderInvoice = async (req, res) => {
        .text(order.mealPreference || '—', 340, tableTop + 29)
        .text(order.paymentMethod  || '—', 470, tableTop + 29);
 
-    // ── TRANSACTION ID (if online) ────────────────────────────────────────────
+    // ── TRANSACTION ID (if online) or CASH COLLECTION DETAILS ─────────────────
     let nextY = tableTop + 70;
     if (order.razorpayOrderId || order.razorpayPaymentId) {
       doc.fillColor('#6b7280').fontSize(9).font('Helvetica')
          .text(`Transaction ID: ${order.razorpayPaymentId || order.razorpayOrderId || '—'}`,
                50, nextY);
+      nextY += 18;
+    }
+
+    const isCashOrder = (order.paymentMethod || '').toLowerCase() === 'cash';
+    if (isCashOrder && order.paymentStatus === 'Paid') {
+      const collectorRole = order.cashCollectedByRole === 'vendor' ? 'Vendor' : 'Delivery Rider';
+      const collectionDate = order.cashCollectedAt || order.cashPaymentConfirmedAt;
+      const formattedCollectionDate = collectionDate
+        ? new Date(collectionDate).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          })
+        : 'N/A';
+
+      doc.fillColor('#166534').fontSize(9).font('Helvetica-Bold')
+         .text(`Payment Method: Cash  |  Collected by: ${collectorRole}  |  Date: ${formattedCollectionDate}  |  Status: PAID`, 50, nextY);
       nextY += 18;
     }
 

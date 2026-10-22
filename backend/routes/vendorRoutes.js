@@ -20,6 +20,8 @@ const {
   verifySalaryRazorpayPayment,
   createDeliveryBatches,
   getBatches,
+  getUnbatchedOrders,
+  assignOrdersToRider,
   assignBatchToRider,
   reassignBatch,
   mergeBatches,
@@ -150,6 +152,8 @@ router.post('/delivery/riders/:riderId/salary/razorpay-order',  createSalaryRazo
 router.post('/delivery/riders/:riderId/salary/razorpay-verify', verifySalaryRazorpayPayment);
 router.post('/delivery/batches/create',                createDeliveryBatches);
 router.get('/delivery/batches',                        getBatches);
+router.get('/delivery/unbatched-orders',                getUnbatchedOrders);
+router.patch('/delivery/orders/assign',                 assignOrdersToRider);
 router.patch('/delivery/batches/:batchId/assign',      assignBatchToRider);
 router.patch('/delivery/batches/:batchId/reassign',    reassignBatch);
 router.post('/delivery/batches/merge',                 mergeBatches);

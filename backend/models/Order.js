@@ -24,8 +24,8 @@ userId: {
   lastDayMealSlot: { type: String, enum: ['both', 'lunch'], default: 'both' },
   orderDate: { type: Date, default: Date.now },
   
-  // Subscription Plan Type (Weekly, Monthly, Trial)
-  planType: { type: String, enum: ['Weekly', 'Monthly', 'Trial', 'Tiffin'], default: 'Tiffin' },
+  // Subscription Plan Type (Weekly, Monthly, Trial, Daily)
+  planType: { type: String, enum: ['Weekly', 'Monthly', 'Trial', 'Tiffin', 'Daily'], default: 'Tiffin' },
 
   // Trial Order - Start and End dates for trial period
   startDate: { type: Date },
@@ -38,6 +38,9 @@ userId: {
   cashPaymentConfirmedAt: { type: Date, default: null },
   cashPaymentConfirmedBy: { type: mongoose.Schema.Types.Mixed, default: null },
   cashPaymentConfirmedByType: { type: String, enum: ['Vendor', 'DeliveryPartner', 'Admin'], default: null },
+  cashCollectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  cashCollectedAt: { type: Date, default: null },
+  cashCollectedByRole: { type: String, enum: ['rider', 'vendor', null], default: null },
   cashCollection: {
     collected: { type: Boolean, default: false },
     amount: { type: Number, default: 0 },
@@ -100,6 +103,8 @@ userId: {
   },
   manualCustomerPincode: { type: String, default: null },
   isManualOrder: { type: Boolean, default: false },
+  isOfflineOrder: { type: Boolean, default: false },
+  leavesAllowed: { type: Number, default: 0 },
 
   // ── Delivery fields ───────────────────────────────────────────────────────
   deliveryPartnerId: {

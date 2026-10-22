@@ -5,6 +5,7 @@ const DeliveryPartner = require('../models/DeliveryPartner');
 const DeliveryBatch   = require('../models/DeliveryBatch');
 const Order           = require('../models/Order');
 const Vendor          = require('../models/Vendor');
+const { getDayBounds, getEligibleOrders, generateEligibilityHint } = require('../utils/deliveryEligibility');
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -66,6 +67,127 @@ const getStatusMessage = (status) => {
     retry_pending: 'Delivery failed — re-attempt scheduled'
   };
   return map[status] || 'Order status updated';
+};
+
+// ── Shared Slot Schedule Constants ───────────────────────────────────────────
+const SLOT_SCHEDULE = {
+  lunch:  { pickupH: 12, pickupM: 0,  deadlineH: 14, deadlineM: 0 },
+  dinner: { pickupH: 19, pickupM: 0,  deadlineH: 21, deadlineM: 0 },
+};
+const MINS_PER_STOP = 7;   // avg minutes between consecutive stops
+const TRANSIT_MINS  = 5;   // kitchen → first stop transit
+
+/**
+ * Validates whether a rider can be assigned batches/orders by a vendor.
+ * Checks vendor ownership, active status, and verified linked user status.
+ */
+const validateAssignableRider = async (vendor, riderId) => {
+  if (!riderId) return { ok: false, status: 400, message: 'riderId is required' };
+  const rider = await DeliveryPartner.findOne({ _id: riderId, vendorId: vendor._id, isActive: true })
+    .populate('userId', 'name phone isVerified isActive');
+  if (!rider) {
+    return { ok: false, status: 404, message: 'Rider not found or inactive' };
+  }
+  if (rider.userId && (rider.userId.isActive === false || rider.userId.isVerified === false)) {
+    return { ok: false, status: 403, message: 'Rider user account is inactive or not verified' };
+  }
+  return { ok: true, rider };
+};
+
+/**
+ * Extracts area, pincode, and GPS coordinates from an Order or linked User.
+ */
+const extractOrderLocation = (order) => {
+  const user = order.userId;
+  let area    = 'unknown';
+  let pincode = 'unknown';
+  let lat     = null;
+  let lng     = null;
+
+  const resolvedAddr =
+    (typeof user?.address === 'object' && user?.address?.area) ? user.address :
+    (order.manualCustomerAddress && typeof order.manualCustomerAddress === 'object' && order.manualCustomerAddress.area) ? order.manualCustomerAddress :
+    null;
+
+  if (resolvedAddr) {
+    area    = resolvedAddr.area    || resolvedAddr.city || 'unknown';
+    pincode = resolvedAddr.pincode || user?.pincode     || order.manualCustomerPincode || 'unknown';
+    lat     = typeof resolvedAddr.latitude  === 'number' ? resolvedAddr.latitude  : null;
+    lng     = typeof resolvedAddr.longitude === 'number' ? resolvedAddr.longitude : null;
+  } else if (user) {
+    pincode = user.pincode || order.manualCustomerPincode || 'unknown';
+    area    = pincode;
+  } else if (order.manualCustomerPincode) {
+    pincode = order.manualCustomerPincode;
+    area    = pincode;
+  }
+  return { area, pincode, lat, lng };
+};
+
+/**
+ * Constructs a batch order sub-document from an Order document.
+ */
+const buildBatchOrderItem = (ord, sequence, scheduledPickupTime) => {
+  const user = ord.userId;
+  let addr         = {};
+  let phone        = '';
+  let customerName = '';
+
+  if (user) {
+    if (typeof user.address === 'object' && user.address && user.address.area) {
+      addr = user.address;
+    } else if (ord.manualCustomerAddress && typeof ord.manualCustomerAddress === 'object' && ord.manualCustomerAddress.area) {
+      addr = ord.manualCustomerAddress;
+    } else {
+      addr = { fullAddress: typeof user.address === 'string' ? user.address : '' };
+    }
+    phone        = user.phone || '';
+    customerName = user.name  || ord.customerName || '';
+  } else {
+    addr         = (ord.manualCustomerAddress && typeof ord.manualCustomerAddress === 'object')
+                     ? ord.manualCustomerAddress
+                     : { fullAddress: '' };
+    phone        = ord.manualCustomerPhone || '';
+    customerName = ord.manualCustomerName  || '';
+  }
+
+  const pickupMs = scheduledPickupTime ? scheduledPickupTime.getTime() : Date.now();
+  const estimatedArrivalTime = new Date(pickupMs + (TRANSIT_MINS + sequence * MINS_PER_STOP) * 60 * 1000);
+
+  return {
+    orderId:             ord._id,
+    userId:              user?._id || user || null,
+    customerName,
+    address:             addr,
+    deliveryPreference:  addr?.deliveryPreference || 'hand_to_me',
+    phone,
+    paymentMethod:       ord.paymentMethod || 'Cash',
+    amount:              ord.amount || ord.totalAmount || ord.planPrice || 0,
+    status:              'pending',
+    sequence,
+    estimatedArrivalTime,
+  };
+};
+
+/**
+ * Resolves an active DeliveryBatch for a rider and order on the current day,
+ * ensuring multi-slot consistency when Order.deliveryRiderId points to another slot.
+ */
+const resolveRiderBatchForOrder = async (orderId, partnerId) => {
+  if (!DeliveryBatch || typeof DeliveryBatch.find !== 'function') return null;
+  const { dayStart, dayEnd } = getDayBounds();
+  const batches = await DeliveryBatch.find({
+    riderId: partnerId,
+    'orders.orderId': orderId,
+    batchDate: { $gte: dayStart, $lte: dayEnd },
+  }).sort({ createdAt: -1 });
+
+  if (!batches || !batches.length) return null;
+  const activeBatch = batches.find(b => {
+    const item = (b.orders || []).find(o => String(o.orderId) === String(orderId));
+    return item && item.status !== 'delivered' && item.status !== 'failed';
+  });
+  return activeBatch || batches[0];
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -424,158 +546,103 @@ const createDeliveryBatches = async (req, res) => {
     if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
 
     // Accept both `batchDate` (preferred) and `date` (legacy frontend key)
-    const { batchDate, date: legacyDate, mealSlot } = req.body;
+    const { batchDate, date: legacyDate, mealSlot, assignMode = 'auto', riderId, orderIds } = req.body;
     if (!mealSlot || !['lunch', 'dinner'].includes(mealSlot)) {
       return res.status(400).json({ message: 'mealSlot must be "lunch" or "dinner"' });
     }
+    if (!['auto', 'rider', 'unassigned'].includes(assignMode)) {
+      return res.status(400).json({ message: 'assignMode must be "auto", "rider", or "unassigned"' });
+    }
+
+    let chosenRider = null;
+    if (assignMode === 'rider') {
+      const { ok, status, message, rider } = await validateAssignableRider(vendor, riderId);
+      if (!ok) return res.status(status).json({ message });
+      chosenRider = rider;
+    }
 
     const dateStr  = batchDate || legacyDate || null;
-    const date     = dateStr ? new Date(dateStr) : new Date();
-    const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
-    const dayEnd   = new Date(date); dayEnd.setHours(23, 59, 59, 999);
+    const { dayStart, dayEnd } = getDayBounds(dateStr);
 
     console.log(`[createBatch] vendor=${vendor._id} mealSlot=${mealSlot} dayStart=${dayStart.toISOString()} dayEnd=${dayEnd.toISOString()}`);
 
-    // Find order IDs already batched for THIS mealSlot today.
-    // Using the batch's own orders array as source of truth so lunch batches
-    // do NOT block orders from being included in dinner batches and vice versa.
-    const sameMealBatches = await DeliveryBatch.find(
-      { vendorId: vendor._id, batchDate: { $gte: dayStart, $lte: dayEnd }, mealSlot },
-      'orders.orderId'
-    );
-    const alreadyBatchedOrderIds = sameMealBatches.flatMap(b => b.orders.map(o => o.orderId));
-    console.log(`[createBatch] existing ${mealSlot} batches today: ${sameMealBatches.length}, already-batched order IDs: ${alreadyBatchedOrderIds.length}`);
-
-    // Include all active/trial orders for the day that are NOT yet in a
-    // same-mealSlot batch. Recurring subscriptions appear every day —
-    // they may already have a lunch batch but must still enter a dinner batch.
-    // NOTE: startDate may be null on older orders — include those too so they
-    // are not silently dropped.
-    const orders = await Order.find({
+    const { eligible: allEligible } = await getEligibleOrders({
       vendorId: vendor._id,
-      status:   { $in: ['active', 'trial'] },
-      $and: [
-        {
-          $or: [
-            { startDate: null },
-            { startDate: { $exists: false } },
-            { startDate: { $lte: dayEnd } },
-          ]
-        },
-        {
-          $or: [
-            { endDate: { $gte: dayStart } },
-            { endDate: null },
-            { endDate: { $exists: false } },
-          ]
-        },
-        { _id: { $nin: alreadyBatchedOrderIds } },
-      ]
-    }).populate('userId', 'name phone address pincode');
-
-    console.log(`[createBatch] orders found (pre-filter): ${orders.length}`);
-    orders.forEach(o => {
-      console.log(`  order ${o._id}: status=${o.status} startDate=${o.startDate} endDate=${o.endDate} firstDayMealSlot=${o.firstDayMealSlot} source=${o.source}`);
+      date: dateStr,
+      mealSlot,
+      withReasons: false,
     });
 
-    // Apply first-day and last-day meal slot rules.
-    //
-    // firstDayMealSlot (start date):
-    //   'both'   → include in both lunch and dinner batches
-    //   'dinner' → skip lunch batch on day 1, include in dinner batch only
-    //   'none'   → skip all batches today (plan starts tomorrow)
-    //
-    // lastDayMealSlot (end date / last meal day):
-    //   'both'   → normal last day — include in both lunch and dinner batches
-    //   'lunch'  → compensation day — include in lunch batch ONLY
-    //              (used when firstDayMealSlot='dinner': missed lunch on day 1
-    //               is compensated by giving only lunch on the final day)
-    const filteredOrders = orders.filter(order => {
-      // ── First-day check ──────────────────────────────────────────────────
-      if (order.startDate) {
-        const orderStart = new Date(order.startDate);
-        const isFirstDay = orderStart >= dayStart && orderStart <= dayEnd;
-        if (isFirstDay) {
-          const slot = order.firstDayMealSlot || 'both';
-          // 'none' was a legacy mis-stored value — treat as 'both' (startDate is
-          // already set to the actual first delivery day, so both meals apply)
-          if (slot === 'dinner') return mealSlot === 'dinner';
-          // 'both' / 'none' (legacy) → fall through to last-day check
-        }
-      }
-
-      // ── Last-day check ───────────────────────────────────────────────────
-      if (order.endDate) {
-        const orderEnd  = new Date(order.endDate);
-        const isLastDay = orderEnd >= dayStart && orderEnd <= dayEnd;
-        if (isLastDay) {
-          const lastSlot = order.lastDayMealSlot || 'both';
-          if (lastSlot === 'lunch') return mealSlot === 'lunch'; // skip dinner
-          // 'both' → include in both batches
-        }
-      }
-
-      return true;
-    });
-
-    console.log(`[createBatch] orders after meal-slot filter: ${filteredOrders.length}`);
-    if (filteredOrders.length !== orders.length) {
-      const filteredIds = new Set(filteredOrders.map(o => String(o._id)));
-      const skipped = orders.filter(o => !filteredIds.has(String(o._id)));
-      skipped.forEach(o => console.log(`  SKIPPED: order ${o._id} firstDayMealSlot=${o.firstDayMealSlot} lastDayMealSlot=${o.lastDayMealSlot} startDate=${o.startDate} endDate=${o.endDate}`));
+    let filteredOrders = allEligible;
+    let skippedOrderIds = [];
+    if (Array.isArray(orderIds) && orderIds.length > 0) {
+      const allowedSet = new Set(orderIds.map(String));
+      filteredOrders = allEligible.filter(o => allowedSet.has(String(o._id)));
+      const matchedSet = new Set(filteredOrders.map(o => String(o._id)));
+      skippedOrderIds = orderIds.filter(id => !matchedSet.has(String(id)));
     }
 
     if (!filteredOrders.length) {
-      return res.json({ message: 'No unbatched orders found for this date/slot', batches: [], debug: { dayStart, dayEnd, mealSlot, ordersBeforeFilter: orders.length } });
+      const fullEligibility = await getEligibleOrders({
+        vendorId: vendor._id,
+        date: dateStr,
+        mealSlot,
+        withReasons: true,
+      });
+      const reasons = fullEligibility.excluded;
+      const hint = generateEligibilityHint(reasons);
+      return res.json({
+        message: 'No unbatched orders found for this date/slot',
+        batches: [],
+        assignments: [],
+        skippedOrderIds,
+        reasons,
+        hint,
+        debug: { dayStart, dayEnd, mealSlot, ordersBeforeFilter: allEligible.length }
+      });
     }
 
-    const riders = await DeliveryPartner.find({ vendorId: vendor._id, isActive: true, isAvailable: true });
-    console.log(`[createBatch] available riders: ${riders.length}`);
+    // Load calculation for auto mode
+    let riders = [];
+    const riderLoads = new Map();
+    if (assignMode === 'auto') {
+      riders = await DeliveryPartner.find({ vendorId: vendor._id, isActive: true, isAvailable: true })
+        .populate('userId', 'name phone isVerified isActive');
+      if (!riders.length) {
+        riders = await DeliveryPartner.find({ vendorId: vendor._id, isActive: true })
+          .populate('userId', 'name phone isVerified isActive');
+      }
+      riders = riders.filter(r => !r.userId || r.userId.isActive !== false);
+
+      const existingSlotBatches = await DeliveryBatch.find({
+        vendorId: vendor._id,
+        batchDate: { $gte: dayStart, $lte: dayEnd },
+        mealSlot,
+      });
+      riders.forEach(r => riderLoads.set(String(r._id), 0));
+      for (const b of existingSlotBatches) {
+        if (b.riderId && riderLoads.has(String(b.riderId))) {
+          riderLoads.set(String(b.riderId), riderLoads.get(String(b.riderId)) + (b.orders || []).length);
+        }
+      }
+    }
 
     // GPS-based clustering (2 km radius) with pincode fallback
-    // Orders with valid GPS are clustered spatially; those without GPS fall back
-    // to pincode/area text grouping. GPS clusters absorb nearby pincode orders.
     const GPS_CLUSTER_RADIUS_KM = 2.0;
 
     const allStops = filteredOrders.map(order => {
-      const user = order.userId;
-      let area    = 'unknown';
-      let pincode = 'unknown';
-      let lat     = null;
-      let lng     = null;
-
-      // Resolve address: prefer structured user.address, fall back to manualCustomerAddress, then pincode
-      const resolvedAddr =
-        (typeof user?.address === 'object' && user?.address?.area) ? user.address :
-        (order.manualCustomerAddress && typeof order.manualCustomerAddress === 'object' && order.manualCustomerAddress.area) ? order.manualCustomerAddress :
-        null;
-
-      if (resolvedAddr) {
-        area    = resolvedAddr.area    || resolvedAddr.city || 'unknown';
-        pincode = resolvedAddr.pincode || user?.pincode     || order.manualCustomerPincode || 'unknown';
-        lat     = typeof resolvedAddr.latitude  === 'number' ? resolvedAddr.latitude  : null;
-        lng     = typeof resolvedAddr.longitude === 'number' ? resolvedAddr.longitude : null;
-      } else if (user) {
-        pincode = user.pincode || order.manualCustomerPincode || 'unknown';
-        area    = pincode;
-      } else if (order.manualCustomerPincode) {
-        pincode = order.manualCustomerPincode;
-        area    = pincode;
-      }
-      return { order, lat, lng, area, pincode, clusterId: null };
+      const loc = extractOrderLocation(order);
+      return { order, lat: loc.lat, lng: loc.lng, area: loc.area, pincode: loc.pincode, clusterId: null };
     });
 
-    // Greedy GPS clustering: assign each GPS stop to the nearest existing cluster
-    // centroid if within radius, else start a new cluster
     const gpsClusters = []; // [{ centLat, centLng, area, pincode, stops[] }]
     for (const stop of allStops) {
-      if (stop.lat == null || stop.lng == null) continue; // handle later
+      if (stop.lat == null || stop.lng == null) continue;
 
       let assigned = false;
       for (const cluster of gpsClusters) {
         if (calculateDistance(stop.lat, stop.lng, cluster.centLat, cluster.centLng) <= GPS_CLUSTER_RADIUS_KM) {
           cluster.stops.push(stop);
-          // Recalculate centroid
           cluster.centLat = cluster.stops.reduce((s, x) => s + x.lat, 0) / cluster.stops.length;
           cluster.centLng = cluster.stops.reduce((s, x) => s + x.lng, 0) / cluster.stops.length;
           assigned = true;
@@ -587,7 +654,6 @@ const createDeliveryBatches = async (req, res) => {
       }
     }
 
-    // For each cluster pick the most common area/pincode label
     const labelCluster = (cluster) => {
       const areaCount = {};
       for (const s of cluster.stops) { areaCount[s.area] = (areaCount[s.area] || 0) + 1; }
@@ -600,17 +666,12 @@ const createDeliveryBatches = async (req, res) => {
     };
     gpsClusters.forEach(labelCluster);
 
-    // Absorb no-GPS stops: assign to nearest GPS cluster (if within radius)
-    // else fall back to pincode/area text bucket
     const pincodeGroups = {};
     for (const stop of allStops) {
-      if (stop.lat != null && stop.lng != null) continue; // already in gpsClusters
+      if (stop.lat != null && stop.lng != null) continue;
 
-      // Try nearest GPS cluster
       let bestCluster = null;
-      let bestDist    = Infinity;
       for (const cluster of gpsClusters) {
-        // Match by pincode OR area label first (same zone, no GPS)
         if (cluster.pincode === stop.pincode || cluster.area === stop.area) {
           cluster.stops.push(stop);
           bestCluster = cluster;
@@ -618,49 +679,33 @@ const createDeliveryBatches = async (req, res) => {
         }
       }
       if (!bestCluster) {
-        // No matching GPS cluster — put in pincode text bucket
         const key = stop.pincode !== 'unknown' ? stop.pincode : stop.area;
         if (!pincodeGroups[key]) pincodeGroups[key] = { area: stop.area, pincode: stop.pincode, stops: [] };
         pincodeGroups[key].stops.push(stop);
       }
     }
 
-    // Merge all cluster sources into final groups array
     const groups = [
       ...gpsClusters.map(c => ({ area: c.area, pincode: c.pincode, stops: c.stops })),
       ...Object.values(pincodeGroups),
     ].filter(g => g.stops.length > 0);
 
-    console.log(`[createBatch] GPS clusters: ${gpsClusters.length}, pincode groups: ${Object.keys(pincodeGroups).length}, total groups: ${groups.length}`);
-    groups.forEach(g => console.log(`  group area=${g.area} pincode=${g.pincode} stops=${g.stops.length}`));
-
-    // ── Dabbawala-style scheduled times ──────────────────────────────────────
-    // Lunch: kitchen ready 11:45, rider picks up 12:00, deliver by 14:00
-    // Dinner: kitchen ready 18:45, rider picks up 19:00, deliver by 21:00
-    const SLOT_SCHEDULE = {
-      lunch:  { pickupH: 12, pickupM: 0,  deadlineH: 14, deadlineM: 0 },
-      dinner: { pickupH: 19, pickupM: 0,  deadlineH: 21, deadlineM: 0 },
-    };
     const sched = SLOT_SCHEDULE[mealSlot] || SLOT_SCHEDULE.lunch;
     const scheduledPickupTime = new Date(dayStart);
     scheduledPickupTime.setHours(sched.pickupH, sched.pickupM, 0, 0);
     const deliveryDeadline = new Date(dayStart);
     deliveryDeadline.setHours(sched.deadlineH, sched.deadlineM, 0, 0);
-    const MINS_PER_STOP = 7;   // avg minutes between consecutive stops
-    const TRANSIT_MINS  = 5;   // kitchen → first stop transit
 
     const createdBatches = [];
     const vendorLat = vendor.latitude  || 0;
     const vendorLng = vendor.longitude || 0;
 
-    // Split clusters that exceed vendor's maxDeliveriesPerBatch setting
     const MAX_PER_BATCH = vendor.deliverySettings?.maxDeliveriesPerBatch || 10;
     const finalGroups = [];
     for (const group of groups) {
       if (group.stops.length <= MAX_PER_BATCH) {
         finalGroups.push(group);
       } else {
-        // Chunk into sub-batches of MAX_PER_BATCH
         for (let i = 0; i < group.stops.length; i += MAX_PER_BATCH) {
           finalGroups.push({
             area:    group.area,
@@ -671,15 +716,41 @@ const createDeliveryBatches = async (req, res) => {
       }
     }
 
-    let riderRoundRobin = 0;
     for (const group of finalGroups) {
-      // Prefer rider whose serviceArea covers this pincode/area, else round-robin
-      const assignedRider = riders.length
-        ? (riders.find(r =>
+      let assignedRider = null;
+      if (assignMode === 'rider') {
+        assignedRider = chosenRider;
+      } else if (assignMode === 'unassigned') {
+        assignedRider = null;
+      } else {
+        if (riders.length > 0) {
+          // ServiceArea match first
+          const areaMatch = riders.find(r =>
             r.serviceArea?.pincodes?.includes(group.pincode) ||
             r.serviceArea?.areas?.includes(group.area)
-          ) || riders[riderRoundRobin++ % riders.length])
-        : null;
+          );
+          if (areaMatch) {
+            assignedRider = areaMatch;
+          } else {
+            // Least-loaded available rider; stable tie-break
+            let minLoad = Infinity;
+            let minRider = riders[0];
+            for (const r of riders) {
+              const load = riderLoads.get(String(r._id)) ?? 0;
+              if (load < minLoad) {
+                minLoad = load;
+                minRider = r;
+              }
+            }
+            assignedRider = minRider;
+          }
+
+          if (assignedRider) {
+            const currentLoad = riderLoads.get(String(assignedRider._id)) || 0;
+            riderLoads.set(String(assignedRider._id), currentLoad + group.stops.length);
+          }
+        }
+      }
 
       // Optimize stop sequence
       const optimized = optimizeRoute(
@@ -688,45 +759,7 @@ const createDeliveryBatches = async (req, res) => {
       );
 
       const batchOrders = optimized.map((stop, idx) => {
-        const ord  = stop.order;
-        const user = ord.userId;
-        let addr         = {};
-        let phone        = '';
-        let customerName = '';
-
-        if (user) {
-          // Prefer user's structured address; for manual customers fall back to order's manualCustomerAddress
-          if (typeof user.address === 'object' && user.address && user.address.area) {
-            addr = user.address;
-          } else if (ord.manualCustomerAddress && typeof ord.manualCustomerAddress === 'object' && ord.manualCustomerAddress.area) {
-            addr = ord.manualCustomerAddress;
-          } else {
-            addr = { fullAddress: typeof user.address === 'string' ? user.address : '' };
-          }
-          phone        = user.phone || '';
-          customerName = user.name  || ord.customerName || '';
-        } else {
-          addr         = (ord.manualCustomerAddress && typeof ord.manualCustomerAddress === 'object')
-                           ? ord.manualCustomerAddress
-                           : { fullAddress: '' };
-          phone        = ord.manualCustomerPhone || '';
-          customerName = ord.manualCustomerName  || '';
-        }
-
-        return {
-          orderId:             ord._id,
-          userId:              user?._id,
-          customerName,
-          address:             addr,
-          deliveryPreference:  addr?.deliveryPreference || 'hand_to_me',
-          phone,
-          status:              'pending',
-          sequence:            idx + 1,
-          estimatedArrivalTime: new Date(
-            scheduledPickupTime.getTime() +
-            (TRANSIT_MINS + (idx + 1) * MINS_PER_STOP) * 60 * 1000
-          ),
-        };
+        return buildBatchOrderItem(stop.order, idx + 1, scheduledPickupTime);
       });
 
       const batch = await DeliveryBatch.create({
@@ -809,12 +842,28 @@ const createDeliveryBatches = async (req, res) => {
     }
 
     const unassigned = createdBatches.filter(b => !b.riderId).length;
+    const assignments = createdBatches.map(b => {
+      let rName = null;
+      if (b.riderId) {
+        const matchedRider = (riders || []).find(r => String(r._id) === String(b.riderId)) || chosenRider;
+        rName = matchedRider?.name || null;
+      }
+      return {
+        batchId: b._id,
+        riderId: b.riderId || null,
+        riderName: rName,
+        orderCount: (b.orders || []).length,
+      };
+    });
+
     return res.json({
       message:       `${createdBatches.length} batch(es) created`,
       batchesCreated: createdBatches.length,
-      totalOrders:   orders.length,
+      totalOrders:   filteredOrders.length,
       unassigned,
       batches:       createdBatches,
+      assignments,
+      skippedOrderIds,
     });
   } catch (err) {
     console.error('createDeliveryBatches:', err);
@@ -841,9 +890,88 @@ const getBatches = async (req, res) => {
     const batches = await DeliveryBatch.find(filter)
       .populate('riderId', 'name phone')
       .sort({ batchDate: -1, mealSlot: 1 });
-    return res.json(batches);
+
+    const orderIds = batches.flatMap(b => (b.orders || []).map(o => o.orderId));
+    const liveOrders = await Order.find(
+      { _id: { $in: orderIds } },
+      'paymentStatus paymentMethod amount cashCollection customerName manualCustomerName'
+    ).lean();
+    const liveOrderMap = new Map(liveOrders.map(o => [String(o._id), o]));
+
+    const enrichedBatches = batches.map(batch => {
+      const b = batch.toObject ? batch.toObject() : { ...batch };
+      b.orders = (b.orders || []).map(item => {
+        const live = liveOrderMap.get(String(item.orderId));
+        return {
+          ...item,
+          customerName: item.customerName || live?.customerName || live?.manualCustomerName || '',
+          phone: item.phone || '',
+          paymentStatus: live?.paymentStatus || 'Pending',
+          paymentMethod: live?.paymentMethod || 'Cash',
+          amount: live?.amount ?? 0,
+          cashCollection: live?.cashCollection || null,
+        };
+      });
+      return b;
+    });
+
+    return res.json(enrichedBatches);
   } catch (err) {
     console.error('getBatches:', err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// @desc   Get unbatched orders for vendor on date/slot
+// @route  GET /api/vendor/delivery/unbatched-orders
+const getUnbatchedOrders = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const { date, mealSlot } = req.query;
+    if (!mealSlot || !['lunch', 'dinner'].includes(mealSlot)) {
+      return res.status(400).json({ message: 'mealSlot must be "lunch" or "dinner"' });
+    }
+
+    const { eligible, excluded } = await getEligibleOrders({
+      vendorId: vendor._id,
+      date,
+      mealSlot,
+      withReasons: true,
+    });
+
+    const formattedOrders = eligible.map(ord => {
+      const { area, pincode, lat, lng } = extractOrderLocation(ord);
+      const user = ord.userId;
+      const phone = user?.phone || ord.manualCustomerPhone || '';
+      const customerName = user?.name || ord.customerName || ord.manualCustomerName || 'Customer';
+
+      return {
+        orderId: ord._id,
+        customerName,
+        phone,
+        area,
+        pincode,
+        planType: ord.planType,
+        paymentMethod: ord.paymentMethod || 'Cash',
+        paymentStatus: ord.paymentStatus || 'Pending',
+        amount: ord.amount || ord.totalAmount || ord.planPrice || 0,
+        hasCoordinates: lat != null && lng != null,
+        currentBatchId: null,
+      };
+    });
+
+    const hint = generateEligibilityHint(excluded);
+    return res.json({
+      date: date || new Date().toISOString().slice(0, 10),
+      mealSlot,
+      orders: formattedOrders,
+      reasons: excluded,
+      hint,
+    });
+  } catch (err) {
+    console.error('getUnbatchedOrders:', err);
     return res.status(500).json({ message: err.message });
   }
 };
@@ -861,8 +989,10 @@ const assignBatchToRider = async (req, res) => {
     if (batch.batchStatus === 'completed') {
       return res.status(400).json({ message: 'Cannot assign a completed batch' });
     }
-    const rider = await DeliveryPartner.findOne({ _id: riderId, vendorId: vendor._id, isActive: true });
-    if (!rider) return res.status(404).json({ message: 'Rider not found or inactive' });
+
+    const { ok: riderOk, status: riderStatus, message: riderMsg, rider } = await validateAssignableRider(vendor, riderId);
+    if (!riderOk) return res.status(riderStatus).json({ message: riderMsg });
+
     batch.riderId     = riderId;
     batch.batchStatus = 'assigned';
     await batch.save();
@@ -902,6 +1032,329 @@ const assignBatchToRider = async (req, res) => {
     return res.json({ message: 'Batch assigned to rider', batch });
   } catch (err) {
     console.error('assignBatchToRider:', err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// @desc   Assign one or more orders to a specific rider (per-order or bulk)
+// @route  PATCH /api/vendor/delivery/orders/assign
+const assignOrdersToRider = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ ownerId: req.user._id });
+    if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
+
+    const { orderIds, riderId, mealSlot, date } = req.body;
+    if (!Array.isArray(orderIds) || !orderIds.length) {
+      return res.status(400).json({ message: 'orderIds must be a non-empty array' });
+    }
+    if (!mealSlot || !['lunch', 'dinner'].includes(mealSlot)) {
+      return res.status(400).json({ message: 'mealSlot must be "lunch" or "dinner"' });
+    }
+
+    // Step 2: Validate rider once up front
+    const { ok: riderOk, status: riderStatus, message: riderMsg, rider } = await validateAssignableRider(vendor, riderId);
+    if (!riderOk) return res.status(riderStatus).json({ message: riderMsg });
+
+    const { dayStart, dayEnd } = getDayBounds(date);
+    const vendorLat = vendor.latitude || 0;
+    const vendorLng = vendor.longitude || 0;
+
+    const results = [];
+    let movedCount = 0;
+    let failedCount = 0;
+
+    const touchedTargetBatches = new Map();
+    const oldRiderUserIdsToNotify = new Set();
+    const ordersMovedForCustomerNotify = [];
+
+    for (const orderId of orderIds) {
+      // Step 1: Verify order belongs to this vendor
+      const order = await Order.findOne({ _id: orderId, vendorId: vendor._id }).populate('userId', 'name phone address pincode');
+      if (!order) {
+        results.push({ orderId, ok: false, code: 'NOT_FOUND', message: 'Order not found for this vendor' });
+        failedCount++;
+        continue;
+      }
+
+      // Step 3: Find source batch for this vendor + day + mealSlot where orders.orderId == orderId
+      const sourceBatch = await DeliveryBatch.findOne({
+        vendorId: vendor._id,
+        batchDate: { $gte: dayStart, $lte: dayEnd },
+        mealSlot,
+        'orders.orderId': order._id,
+      });
+
+      let sourceItem = null;
+      if (sourceBatch) {
+        sourceItem = (sourceBatch.orders || []).find(o => String(o.orderId) === String(order._id));
+      } else {
+        // Unbatched order: verify eligibility
+        const { eligible, excluded } = await getEligibleOrders({
+          vendorId: vendor._id,
+          date,
+          mealSlot,
+          withReasons: true,
+        });
+        const isEligible = eligible.some(o => String(o._id) === String(order._id));
+        if (!isEligible) {
+          const hint = generateEligibilityHint(excluded);
+          results.push({
+            orderId,
+            ok: false,
+            code: 'NOT_ELIGIBLE',
+            message: hint || 'Order is not eligible for batching on this date/slot',
+          });
+          failedCount++;
+          continue;
+        }
+      }
+
+      // Step 4: Item status guards
+      if (sourceItem) {
+        if (sourceItem.status === 'delivered') {
+          results.push({ orderId, ok: false, code: 'ORDER_ALREADY_DELIVERED', message: 'Order is already delivered' });
+          failedCount++;
+          continue;
+        }
+        if (sourceItem.status === 'picked_up' || sourceItem.status === 'on_the_way') {
+          results.push({ orderId, ok: false, code: 'ORDER_IN_TRANSIT', message: 'Order is in transit' });
+          failedCount++;
+          continue;
+        }
+        if (sourceItem.status === 'failed') {
+          results.push({ orderId, ok: false, code: 'ORDER_FAILED', message: 'Order delivery has failed' });
+          failedCount++;
+          continue;
+        }
+
+        // Step 5: If source batch's riderId already equals target riderId -> no-op
+        if (sourceBatch.riderId && String(sourceBatch.riderId) === String(rider._id)) {
+          results.push({ orderId, ok: true, noop: true, batchId: sourceBatch._id });
+          continue;
+        }
+      }
+
+      // Step 6: Find or create target batch
+      let targetBatch = touchedTargetBatches.get(String(rider._id)) || await DeliveryBatch.findOne({
+        vendorId: vendor._id,
+        batchDate: { $gte: dayStart, $lte: dayEnd },
+        mealSlot,
+        riderId: rider._id,
+        batchStatus: { $in: ['assigned', 'in_progress'] },
+      });
+
+      const orderLocation = extractOrderLocation(order);
+
+      if (!targetBatch) {
+        const sched = SLOT_SCHEDULE[mealSlot] || SLOT_SCHEDULE.lunch;
+        const scheduledPickupTime = new Date(dayStart);
+        scheduledPickupTime.setHours(sched.pickupH, sched.pickupM, 0, 0);
+        const deliveryDeadline = new Date(dayStart);
+        deliveryDeadline.setHours(sched.deadlineH, sched.deadlineM, 0, 0);
+
+        targetBatch = await DeliveryBatch.create({
+          vendorId: vendor._id,
+          riderId: rider._id,
+          batchDate: dayStart,
+          mealSlot,
+          area: orderLocation.area !== 'unknown' ? orderLocation.area : (vendor.address?.area || 'Valsad'),
+          pincode: orderLocation.pincode !== 'unknown' ? orderLocation.pincode : (vendor.address?.pincode || ''),
+          orders: [],
+          optimizedRoute: [],
+          batchStatus: 'assigned',
+          scheduledPickupTime,
+          deliveryDeadline,
+        });
+      }
+
+      touchedTargetBatches.set(String(rider._id), targetBatch);
+
+      // Step 7: Build batch item
+      let newItem;
+      if (sourceItem) {
+        newItem = sourceItem.toObject ? sourceItem.toObject() : { ...sourceItem };
+        newItem.status = 'assigned';
+        delete newItem.pickedUpAt;
+      } else {
+        newItem = buildBatchOrderItem(order, targetBatch.orders.length + 1, targetBatch.scheduledPickupTime);
+        newItem.status = 'assigned';
+      }
+
+      newItem.sequence = targetBatch.orders.length + 1;
+      const pickupMs = targetBatch.scheduledPickupTime ? targetBatch.scheduledPickupTime.getTime() : dayStart.getTime();
+      newItem.estimatedArrivalTime = new Date(pickupMs + (TRANSIT_MINS + newItem.sequence * MINS_PER_STOP) * 60 * 1000);
+
+      targetBatch.orders.push(newItem);
+
+      // Re-run nearest-neighbor route optimization on not-yet-delivered stops
+      const deliveredStops = targetBatch.orders.filter(s => s.status === 'delivered' || s.status === 'failed');
+      const unvisitedStops = targetBatch.orders.filter(s => s.status !== 'delivered' && s.status !== 'failed');
+
+      let startLat = vendorLat;
+      let startLng = vendorLng;
+      if (deliveredStops.length > 0) {
+        const lastDelivered = deliveredStops[deliveredStops.length - 1];
+        if (lastDelivered.address?.latitude && lastDelivered.address?.longitude) {
+          startLat = lastDelivered.address.latitude;
+          startLng = lastDelivered.address.longitude;
+        }
+      }
+
+      const stopsToOptimize = unvisitedStops.map(s => ({
+        lat: s.address?.latitude ?? null,
+        lng: s.address?.longitude ?? null,
+        orderId: s.orderId,
+        stopDoc: s,
+      }));
+
+      const optimizedRouteStops = optimizeRoute(startLat, startLng, stopsToOptimize);
+      const reorderedUnvisited = optimizedRouteStops.map(s => s.stopDoc);
+
+      const finalStops = [...deliveredStops, ...reorderedUnvisited];
+      finalStops.forEach((stop, idx) => {
+        stop.sequence = idx + 1;
+        stop.estimatedArrivalTime = new Date(pickupMs + (TRANSIT_MINS + (idx + 1) * MINS_PER_STOP) * 60 * 1000);
+      });
+
+      targetBatch.orders = finalStops;
+      targetBatch.optimizedRoute = finalStops.map((s, idx) => ({
+        latitude: s.address?.latitude,
+        longitude: s.address?.longitude,
+        sequence: idx + 1,
+        orderId: s.orderId,
+      }));
+
+      // Step 8: Writes
+      await targetBatch.save();
+
+      // Update Order document
+      await Order.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            deliveryBatchId: targetBatch._id,
+            deliveryRiderId: rider._id,
+            deliveryStatus:  'assigned',
+            mealSlot,
+          }
+        }
+      );
+
+      // Clean up source batch if existed
+      if (sourceBatch) {
+        if (sourceBatch.riderId && String(sourceBatch.riderId) !== String(rider._id)) {
+          try {
+            const oldPartnerQuery = DeliveryPartner.findById(sourceBatch.riderId);
+            const oldPartner = oldPartnerQuery && typeof oldPartnerQuery.select === 'function'
+              ? await oldPartnerQuery.select('userId')
+              : await oldPartnerQuery;
+            if (oldPartner?.userId) {
+              oldRiderUserIdsToNotify.add(String(oldPartner.userId));
+            }
+          } catch {
+            // Non-fatal
+          }
+        }
+
+        await DeliveryBatch.updateOne(
+          { _id: sourceBatch._id },
+          {
+            $pull: {
+              orders: { orderId: order._id },
+              optimizedRoute: { orderId: order._id },
+            }
+          }
+        );
+
+        const updatedSource = await DeliveryBatch.findById(sourceBatch._id);
+        if (!updatedSource || updatedSource.orders.length === 0) {
+          if (!['completed', 'partial'].includes(sourceBatch.batchStatus)) {
+            await DeliveryBatch.findByIdAndDelete(sourceBatch._id);
+          }
+        } else {
+          // Re-sequence source's remaining stops 1..n
+          updatedSource.orders.forEach((s, idx) => { s.sequence = idx + 1; });
+          if (updatedSource.optimizedRoute) {
+            updatedSource.optimizedRoute.forEach((r, idx) => { r.sequence = idx + 1; });
+          }
+          const allDone = updatedSource.orders.every(o => o.status === 'delivered' || o.status === 'failed');
+          if (allDone) {
+            const anyFailed = updatedSource.orders.some(o => o.status === 'failed');
+            updatedSource.batchStatus = anyFailed ? 'partial' : 'completed';
+            updatedSource.completedAt = new Date();
+          }
+          await updatedSource.save();
+        }
+      }
+
+      if (order.userId?._id || order.userId) {
+        ordersMovedForCustomerNotify.push({
+          userId: order.userId?._id || order.userId,
+          orderId: order._id,
+        });
+      }
+
+      results.push({ orderId, ok: true, batchId: targetBatch._id });
+      movedCount++;
+    }
+
+    // Step 9: Notifications (try/catch each)
+    try {
+      const io = global.io;
+      const { notifyRiderNewBatch, notifyDeliveryAssigned } = require('../utils/fcmService');
+      const pickupTime = mealSlot === 'lunch' ? '12:00 PM' : '7:00 PM';
+
+      if (movedCount > 0 && rider.userId) {
+        if (io) {
+          for (const [_, b] of touchedTargetBatches) {
+            io.to(`delivery_${rider.userId}`).emit('new_batch_assigned', {
+              batchId: b._id,
+              mealSlot,
+              area: b.area,
+              orderCount: b.orders.length,
+              batchDate: dayStart,
+            });
+          }
+        }
+        if (typeof notifyRiderNewBatch === 'function') {
+          for (const [_, b] of touchedTargetBatches) {
+            notifyRiderNewBatch(rider.userId, b.area, b.orders.length, pickupTime, mealSlot).catch(console.error);
+          }
+        }
+      }
+
+      if (io) {
+        for (const oldUserId of oldRiderUserIdsToNotify) {
+          io.to(`delivery_${oldUserId}`).emit('batch_reassigned', { message: 'An order was moved to another rider' });
+        }
+      }
+
+      for (const moved of ordersMovedForCustomerNotify) {
+        if (io) {
+          io.to(moved.userId.toString()).emit('delivery_status_update', {
+            orderId: moved.orderId,
+            status: 'assigned',
+            message: getStatusMessage('assigned'),
+          });
+        }
+        if (typeof notifyDeliveryAssigned === 'function') {
+          notifyDeliveryAssigned(moved.userId, rider.name, moved.orderId).catch(console.error);
+        }
+      }
+    } catch (notifErr) {
+      console.error('Notification error in assignOrdersToRider:', notifErr.message);
+    }
+
+    // Step 10: Response
+    if (movedCount === 0 && results.some(r => r.noop)) {
+      return res.status(200).json({ success: true, results, movedCount, failedCount });
+    }
+    if (movedCount === 0 && failedCount > 0) {
+      return res.status(400).json({ success: false, results, movedCount, failedCount });
+    }
+    return res.status(200).json({ success: true, results, movedCount, failedCount });
+  } catch (err) {
+    console.error('assignOrdersToRider:', err);
     return res.status(500).json({ message: err.message });
   }
 };
@@ -1536,7 +1989,32 @@ const getMyBatches = async (req, res) => {
     const batches = await DeliveryBatch.find(filter)
       .populate('vendorId', 'kitchenName address latitude longitude')
       .sort({ batchDate: 1, mealSlot: 1 });
-    return res.json(batches);
+
+    const orderIds = batches.flatMap(b => (b.orders || []).map(o => o.orderId));
+    const liveOrders = await Order.find(
+      { _id: { $in: orderIds } },
+      'paymentStatus paymentMethod amount totalAmount planPrice cashCollection customerName manualCustomerName'
+    ).lean();
+    const liveOrderMap = new Map(liveOrders.map(o => [String(o._id), o]));
+
+    const enrichedBatches = batches.map(batch => {
+      const b = batch.toObject ? batch.toObject() : { ...batch };
+      b.orders = (b.orders || []).map(item => {
+        const live = liveOrderMap.get(String(item.orderId));
+        return {
+          ...item,
+          customerName: item.customerName || live?.customerName || live?.manualCustomerName || '',
+          phone: item.phone || '',
+          paymentStatus: live?.paymentStatus || item.paymentStatus || 'Pending',
+          paymentMethod: live?.paymentMethod || item.paymentMethod || 'Cash',
+          amount: live?.amount || live?.totalAmount || live?.planPrice || item.amount || 0,
+          cashCollection: live?.cashCollection || item.cashCollection || null,
+        };
+      });
+      return b;
+    });
+
+    return res.json(enrichedBatches);
   } catch (err) {
     console.error('getMyBatches:', err);
     return res.status(500).json({ message: err.message });
@@ -1603,11 +2081,19 @@ const updateOrderStatus = async (req, res) => {
     }
 
     // Support both new (deliveryRiderId) and old (deliveryPartnerId) assignment fields
-    const order = await Order.findOne({
+    let order = await Order.findOne({
       _id: orderId,
       $or: [{ deliveryRiderId: partner._id }, { deliveryPartnerId: partner._id }]
     });
+
+    const resolvedBatch = await resolveRiderBatchForOrder(orderId, partner._id);
+    if (!order && resolvedBatch) {
+      order = await Order.findById(orderId);
+    }
+
     if (!order) return res.status(404).json({ message: 'Order not assigned to you' });
+
+    const effectiveBatchId = resolvedBatch?._id || order.deliveryBatchId;
 
     // Handle retry_pending: max 2 attempts, record history
     if (status === 'retry_pending') {
@@ -1641,7 +2127,8 @@ const updateOrderStatus = async (req, res) => {
       }
 
       // 2. Validate GPS accuracy threshold
-      const maxAccuracy = Number(process.env.GPS_ACCURACY_THRESHOLD) || 50;
+      const isWebClient = req.body.isWeb === true || req.body.isWeb === 'true' || req.headers?.['x-client-platform'] === 'web';
+      const maxAccuracy = isWebClient ? 5000 : (Number(process.env.GPS_ACCURACY_THRESHOLD) || 50);
       if (accuracy !== undefined && Number.isFinite(accuracy) && accuracy > maxAccuracy) {
         return res.status(400).json({
           success: false,
@@ -1654,8 +2141,8 @@ const updateOrderStatus = async (req, res) => {
       let custLat;
       let custLng;
 
-      if (order.deliveryBatchId) {
-        const batchForProof = await DeliveryBatch.findById(order.deliveryBatchId).select('orders');
+      if (effectiveBatchId) {
+        const batchForProof = await DeliveryBatch.findById(effectiveBatchId).select('orders');
         const batchOrd = batchForProof?.orders.find(o => o.orderId.toString() === orderId);
         custLat = batchOrd?.address?.latitude;
         custLng = batchOrd?.address?.longitude;
@@ -1698,48 +2185,60 @@ const updateOrderStatus = async (req, res) => {
       // 5. Cash order confirmation (enforced after geofence check)
       const isCashOrder = (order.paymentMethod || '').toLowerCase() === 'cash';
       if (isCashOrder) {
-        const parsedCashAmount = Number(cashAmount);
-        if (cashCollected !== true || !Number.isFinite(parsedCashAmount) || parsedCashAmount <= 0) {
-          return res.status(400).json({
-            success: false,
-            code: 'CASH_COLLECTION_REQUIRED',
-            message: 'Cash collection confirmation and collected amount are required for cash orders.'
-          });
-        }
-
-        const expectedAmount = Number(order.amount) || 0;
-        const difference = parsedCashAmount - expectedAmount;
-        const amountMismatch = difference !== 0;
-
-        order.paymentStatus = 'Paid';
-        order.cashPaymentConfirmedAt = new Date();
-        order.cashPaymentConfirmedBy = partner._id;
-        order.cashPaymentConfirmedByType = 'DeliveryPartner';
-        order.cashCollection = {
-          collected: true,
-          amount: parsedCashAmount,
-          expectedAmount,
-          difference,
-          amountMismatch,
-          collectedAt: new Date(),
-          collectedBy: partner._id,
-          riderName: partner.name || ''
-        };
-
-        const recordOrderTransaction = require('../utils/orderTransaction');
-        await recordOrderTransaction(order, 'Verified', parsedCashAmount);
-
-        try {
-          const io = global.io;
-          if (io) {
-            io.to(`vendor_${order.vendorId}`).emit('cash_payment_updated', {
-              orderId: order._id,
-              paymentStatus: 'Paid',
-              cashCollection: order.cashCollection
+        const alreadyCollected = order.paymentStatus === 'Paid' || order.cashCollection?.collected === true;
+        if (!alreadyCollected) {
+          const parsedCashAmount = Number(cashAmount);
+          if (cashCollected !== true || !Number.isFinite(parsedCashAmount) || parsedCashAmount <= 0) {
+            return res.status(400).json({
+              success: false,
+              code: 'CASH_COLLECTION_REQUIRED',
+              message: 'Please confirm cash collection before marking as delivered'
             });
           }
-        } catch (socketErr) {
-          console.error('Socket error emitting cash_payment_updated:', socketErr.message);
+
+          const expectedAmount = Number(order.amount) || 0;
+          const difference = parsedCashAmount - expectedAmount;
+          const amountMismatch = difference !== 0;
+
+          order.paymentStatus = 'Paid';
+          order.cashPaymentConfirmedAt = new Date();
+          order.cashPaymentConfirmedBy = partner._id;
+          order.cashPaymentConfirmedByType = 'DeliveryPartner';
+          order.cashCollectedBy = partner.userId || partner._id;
+          order.cashCollectedAt = new Date();
+          order.cashCollectedByRole = 'rider';
+          order.cashCollection = {
+            collected: true,
+            amount: parsedCashAmount,
+            expectedAmount,
+            difference,
+            amountMismatch,
+            collectedAt: new Date(),
+            collectedBy: partner._id,
+            riderName: partner.name || ''
+          };
+
+          const recordOrderTransaction = require('../utils/orderTransaction');
+          await recordOrderTransaction(order, 'Verified', parsedCashAmount);
+
+          try {
+            const io = global.io;
+            if (io) {
+              io.to(`vendor_${order.vendorId}`).emit('cash_collected', {
+                orderId: order._id,
+                amount: order.amount,
+                customerName: order.customerName || order.manualCustomerName || 'Customer',
+                collectedAt: order.cashCollectedAt
+              });
+              io.to(`vendor_${order.vendorId}`).emit('cash_payment_updated', {
+                orderId: order._id,
+                paymentStatus: 'Paid',
+                cashCollection: order.cashCollection
+              });
+            }
+          } catch (socketErr) {
+            console.error('Socket error emitting cash_payment_updated:', socketErr.message);
+          }
         }
       }
 
@@ -1758,19 +2257,24 @@ const updateOrderStatus = async (req, res) => {
     await order.save();
 
     // Sync status inside the DeliveryBatch sub-document
-    if (order.deliveryBatchId) {
+    if (effectiveBatchId) {
       const updateFields = { 'orders.$.status': status };
       if (status === 'picked_up') updateFields['orders.$.pickedUpAt']  = new Date();
       if (status === 'delivered') {
         updateFields['orders.$.deliveredAt']   = new Date();
         updateFields['orders.$.deliveryProof'] = order.deliveryProof || null;
+        if (order.paymentStatus) updateFields['orders.$.paymentStatus'] = order.paymentStatus;
+        if (order.cashCollectedAt) {
+          updateFields['orders.$.cashCollected'] = true;
+          updateFields['orders.$.cashCollection'] = order.cashCollection || null;
+        }
       }
       if (failReason) updateFields['orders.$.failReason'] = failReason;
       if (status === 'retry_pending') {
         updateFields['orders.$.retryCount'] = order.retryCount;
       }
       await DeliveryBatch.updateOne(
-        { _id: order.deliveryBatchId, 'orders.orderId': order._id },
+        { _id: effectiveBatchId, 'orders.orderId': order._id },
         { $set: updateFields }
       );
 
@@ -1778,7 +2282,7 @@ const updateOrderStatus = async (req, res) => {
       // fetched doc for the completion check to avoid a 2nd findById.
       let batchForCompletion = null;
       if (status === 'retry_pending' && failReason) {
-        const batchDoc = await DeliveryBatch.findById(order.deliveryBatchId);
+        const batchDoc = await DeliveryBatch.findById(effectiveBatchId);
         if (batchDoc) {
           const batchOrder = batchDoc.orders.find(o => o.orderId.toString() === orderId);
           if (batchOrder) {
@@ -1791,7 +2295,7 @@ const updateOrderStatus = async (req, res) => {
 
       // Check if entire batch is done.
       // retry_pending orders are NOT 'delivered'/'failed' so allDone stays false while any exist.
-      const batch = batchForCompletion || await DeliveryBatch.findById(order.deliveryBatchId);
+      const batch = batchForCompletion || await DeliveryBatch.findById(effectiveBatchId);
       if (batch) {
         const allDone   = batch.orders.every(o => o.status === 'delivered' || o.status === 'failed');
         const anyFailed = batch.orders.some(o => o.status === 'failed');
@@ -1812,8 +2316,8 @@ const updateOrderStatus = async (req, res) => {
         });
       }
       io.to(`vendor_${order.vendorId}`).emit('delivery_status_changed', { orderId: order._id, status });
-      if (order.deliveryBatchId) {
-        io.to(`batch_${order.deliveryBatchId}`).emit('batch_order_updated', { orderId: order._id, status });
+      if (effectiveBatchId) {
+        io.to(`batch_${effectiveBatchId}`).emit('batch_order_updated', { orderId: order._id, status });
       }
     }
 
@@ -1851,6 +2355,116 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 const updateDeliveryStatus = updateOrderStatus; // alias for old route name
+
+// @desc   Mark cash payment collected by delivery partner
+// @route  PATCH /api/delivery/orders/:orderId/cash-collected
+const markCashCollected = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const partner = req.deliveryPartner;
+
+    let order = await Order.findOne({
+      _id: orderId,
+      $or: [{ deliveryRiderId: partner._id }, { deliveryPartnerId: partner._id }]
+    });
+
+    const resolvedBatch = await resolveRiderBatchForOrder(orderId, partner._id);
+    if (!order && resolvedBatch) {
+      order = await Order.findById(orderId);
+    }
+
+    const targetOrder = order || await Order.findById(orderId);
+    if (!targetOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if ((targetOrder.paymentMethod || '').toLowerCase() !== 'cash') {
+      return res.status(400).json({ message: 'Not a cash order' });
+    }
+    if (targetOrder.paymentStatus === 'Paid' && targetOrder.cashCollection?.collected === true) {
+      return res.status(400).json({ message: 'Already collected' });
+    }
+
+    targetOrder.paymentStatus = 'Paid';
+    targetOrder.cashCollectedBy = partner.userId || partner._id;
+    targetOrder.cashCollectedAt = new Date();
+    targetOrder.cashCollectedByRole = 'rider';
+    targetOrder.cashPaymentConfirmedAt = new Date();
+    targetOrder.cashPaymentConfirmedBy = partner._id;
+    targetOrder.cashPaymentConfirmedByType = 'DeliveryPartner';
+    targetOrder.cashCollection = {
+      collected: true,
+      amount: Number(targetOrder.amount) || 0,
+      expectedAmount: Number(targetOrder.amount) || 0,
+      difference: 0,
+      amountMismatch: false,
+      collectedAt: new Date(),
+      collectedBy: partner._id,
+      riderName: partner.name || ''
+    };
+
+    await targetOrder.save();
+
+    // Update batch order status if order is in DeliveryBatch
+    const effectiveBatchId = resolvedBatch?._id || targetOrder.deliveryBatchId;
+    if (effectiveBatchId) {
+      try {
+        await DeliveryBatch.updateOne(
+          { _id: effectiveBatchId, 'orders.orderId': targetOrder._id },
+          {
+            $set: {
+              'orders.$.paymentStatus': 'Paid',
+              'orders.$.cashCollected': true,
+              'orders.$.cashCollectedByRole': 'rider'
+            }
+          }
+        );
+      } catch (batchErr) {
+        console.error('Error updating batch order payment status:', batchErr.message);
+      }
+    }
+
+    try {
+      const recordOrderTransaction = require('../utils/orderTransaction');
+      await recordOrderTransaction(targetOrder, 'Verified', Number(targetOrder.amount) || 0);
+    } catch (_) {}
+
+    // Notify vendor via socket
+    try {
+      const io = global.io || req.app?.get('io');
+      if (io) {
+        io.to('vendor_' + targetOrder.vendorId).emit('cash_collected', {
+          orderId: targetOrder._id,
+          amount: targetOrder.amount,
+          customerName: targetOrder.customerName || targetOrder.manualCustomerName || 'Customer',
+          collectedAt: targetOrder.cashCollectedAt
+        });
+        io.to(`vendor_${targetOrder.vendorId}`).emit('cash_payment_updated', {
+          orderId: targetOrder._id,
+          paymentStatus: 'Paid',
+          cashCollection: targetOrder.cashCollection
+        });
+      }
+    } catch (socketErr) {
+      console.error('Socket error emitting cash_collected:', socketErr.message);
+    }
+
+    return res.json({
+      success: true,
+      message: 'Cash collected successfully',
+      order: {
+        _id: targetOrder._id,
+        paymentStatus: targetOrder.paymentStatus,
+        cashCollectedBy: targetOrder.cashCollectedBy,
+        cashCollectedAt: targetOrder.cashCollectedAt,
+        cashCollectedByRole: targetOrder.cashCollectedByRole
+      }
+    });
+  } catch (err) {
+    console.error('markCashCollected:', err);
+    return res.status(500).json({ message: err.message });
+  }
+};
 
 // @desc   Update rider GPS location
 // @route  POST /api/delivery/location
@@ -2341,9 +2955,13 @@ module.exports = {
   verifySalaryRazorpayPayment,
   createDeliveryBatches,
   getBatches,
+  getUnbatchedOrders,
+  assignOrdersToRider,
   assignBatchToRider,
   reassignBatch,
   mergeBatches,
+  validateAssignableRider,
+  resolveRiderBatchForOrder,
   getLiveRiderLocations,
   getAttendance,
   getDeliveryAnalytics,
@@ -2356,6 +2974,7 @@ module.exports = {
   acceptBatch,
   updateOrderStatus,
   updateDeliveryStatus,
+  markCashCollected,
   updateRiderLocation,
   updateLocation,
   getDeliveryProfile,

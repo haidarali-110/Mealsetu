@@ -9,6 +9,7 @@ const {
   getMyBatches,
   acceptBatch,
   updateOrderStatus,
+  markCashCollected,
   updateRiderLocation,
   getMyStats,
   clockIn,
@@ -31,6 +32,7 @@ router.get('/my-deliveries',                   protectDelivery, getMyDeliveries)
 router.get('/batches',                         protectDelivery, getMyBatches);
 router.patch('/batches/:batchId/accept',       protectDelivery, acceptBatch);
 router.patch('/orders/:orderId/status',        protectDelivery, updateOrderStatus);
+router.patch('/orders/:orderId/cash-collected', protectDelivery, markCashCollected);
 router.post('/location',                       protectDelivery, updateRiderLocation);
 router.get('/stats',                           protectDelivery, getMyStats);
 router.get('/attendance',                           protectDelivery, getMyAttendance);

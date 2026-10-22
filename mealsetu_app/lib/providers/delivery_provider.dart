@@ -107,6 +107,7 @@ class DeliveryProvider extends ChangeNotifier {
     bool? cashCollected,
     double? cashAmount,
     bool? isMocked,
+    bool? isWeb,
     String? proofPhotoUrl,
     String? failReason,
   }) async {
@@ -122,6 +123,7 @@ class DeliveryProvider extends ChangeNotifier {
       if (cashCollected != null)  body['cashCollected'] = cashCollected;
       if (cashAmount != null)     body['cashAmount']    = cashAmount;
       if (isMocked != null)       body['isMocked']      = isMocked;
+      if (isWeb != null)          body['isWeb']         = isWeb;
       if (proofPhotoUrl != null)  body['proofPhotoUrl'] = proofPhotoUrl;
       if (failReason != null)     body['failReason']    = failReason;
 
@@ -133,6 +135,10 @@ class DeliveryProvider extends ChangeNotifier {
           for (final order in orders) {
             if ((order as Map)['orderId']?.toString() == orderId) {
               order['status'] = status;
+              if (cashCollected == true) {
+                order['paymentStatus'] = 'Paid';
+                order['cashCollected'] = true;
+              }
             }
           }
         }
@@ -140,6 +146,30 @@ class DeliveryProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('DeliveryProvider.updateOrderStatus: $e');
+      rethrow;
+    }
+  }
+
+  // ── Mark cash collected ───────────────────────────────────────────────────
+
+  Future<void> markCashCollected(String orderId, String batchId) async {
+    try {
+      await _api.patch('/delivery/orders/$orderId/cash-collected', {'collected': true});
+      for (final batch in _batches) {
+        if (batch['_id']?.toString() == batchId) {
+          final orders = batch['orders'] as List? ?? [];
+          for (final order in orders) {
+            if ((order as Map)['orderId']?.toString() == orderId) {
+              order['paymentStatus'] = 'Paid';
+              order['cashCollected'] = true;
+              order['cashCollectedByRole'] = 'rider';
+            }
+          }
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('DeliveryProvider.markCashCollected: $e');
       rethrow;
     }
   }

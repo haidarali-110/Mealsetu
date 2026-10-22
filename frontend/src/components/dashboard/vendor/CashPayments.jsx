@@ -18,6 +18,7 @@ const fmtDateTime = (dateStr) => {
 
 const planBadge = (planType) => {
   const styles = {
+    Daily:   { background: '#fef3c7', color: '#b45309' },
     Monthly: { background: '#dbeafe', color: '#1d4ed8' },
     Weekly:  { background: '#f3e8ff', color: '#7c3aed' },
     Trial:   { background: '#f1f5f9', color: '#64748b' },
@@ -36,18 +37,16 @@ const planBadge = (planType) => {
 
 const CashPayments = () => {
   const [orders, setOrders] = useState([]);
-  const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [markingPaid, setMarkingPaid] = useState(new Set());
-  const [filter, setFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'collected'
   const [successMessage, setSuccessMessage] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
       const data = await getCashPayments();
       setOrders(data.orders || []);
-      setPendingCount(data.pendingCount || 0);
       setError(null);
     } catch {
       setError('Failed to load cash payments');
@@ -59,10 +58,12 @@ const CashPayments = () => {
   useEffect(() => {
     fetchData();
     const handleCashUpdate = () => fetchData();
+    onEvent('cash_collected', handleCashUpdate);
     onEvent('cash_payment_updated', handleCashUpdate);
     onEvent('new_order', handleCashUpdate);
     onEvent('newOrder', handleCashUpdate);
     return () => {
+      offEvent('cash_collected', handleCashUpdate);
       offEvent('cash_payment_updated', handleCashUpdate);
       offEvent('new_order', handleCashUpdate);
       offEvent('newOrder', handleCashUpdate);
@@ -75,10 +76,15 @@ const CashPayments = () => {
       await markCashPaymentPaid(orderId);
       setOrders(prev => prev.map(o =>
         o.orderId === orderId
-          ? { ...o, paymentStatus: 'Paid', cashPaymentConfirmedAt: new Date().toISOString() }
+          ? {
+              ...o,
+              paymentStatus: 'Paid',
+              cashCollectedByRole: 'vendor',
+              cashCollectedAt: new Date().toISOString(),
+              cashPaymentConfirmedAt: new Date().toISOString()
+            }
           : o
       ));
-      setPendingCount(prev => Math.max(0, prev - 1));
       setSuccessMessage('Payment marked as collected!');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -93,23 +99,20 @@ const CashPayments = () => {
     }
   };
 
-  const filtered = orders.filter(o => {
-    const isPaid = o.cashCollection?.collected === true || o.paymentStatus === 'Paid';
-    if (filter === 'pending') return !isPaid && o.paymentStatus === 'Pending';
-    if (filter === 'paid')    return isPaid;
-    return true;
+  const pendingOrders = orders.filter(o => {
+    const isPaid = o.paymentStatus === 'Paid' || o.cashCollection?.collected === true;
+    return !isPaid;
   });
 
-  const totalPending = orders.filter(o => o.paymentStatus === 'Pending' && o.cashCollection?.collected !== true).length;
-  const totalPaid    = orders.filter(o => o.paymentStatus === 'Paid' || o.cashCollection?.collected === true).length;
-  const pendingAmount = orders
-    .filter(o => o.paymentStatus === 'Pending')
-    .reduce((s, o) => s + (Number(o.amount) || 0), 0);
+  const collectedOrders = orders.filter(o => {
+    const isPaid = o.paymentStatus === 'Paid' || o.cashCollection?.collected === true;
+    return isPaid;
+  });
 
-  const emptyMsg =
-    filter === 'pending' ? 'No pending cash payments 🎉' :
-    filter === 'paid'    ? 'No collected payments yet' :
-                           'No cash orders yet';
+  const totalPending = pendingOrders.length;
+  const totalPaid    = collectedOrders.length;
+  const pendingAmount = pendingOrders.reduce((s, o) => s + (Number(o.amount) || 0), 0);
+  const collectedAmount = collectedOrders.reduce((s, o) => s + (Number(o.amount) || 0), 0);
 
   if (loading) {
     return (
@@ -144,7 +147,7 @@ const CashPayments = () => {
       {/* Summary cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '14px',
         marginBottom: '24px'
       }}>
@@ -153,7 +156,7 @@ const CashPayments = () => {
           <h3 style={{ color: '#2b3674', margin: 0, fontSize: '24px', fontWeight: '800' }}>{orders.length}</h3>
         </div>
         <div style={{ background: '#fff7ed', borderRadius: '12px', padding: '16px', border: '1px solid #fed7aa' }}>
-          <p style={{ color: '#c2410c', margin: '0 0 6px 0', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>Pending Payment</p>
+          <p style={{ color: '#c2410c', margin: '0 0 6px 0', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>Pending Collection</p>
           <h3 style={{ color: '#ea580c', margin: 0, fontSize: '24px', fontWeight: '800' }}>{totalPending}</h3>
         </div>
         <div style={{ background: '#f0fdf4', borderRadius: '12px', padding: '16px', border: '1px solid #bbf7d0' }}>
@@ -166,125 +169,215 @@ const CashPayments = () => {
         </div>
       </div>
 
-      {/* Filter pills */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto' }}>
-        {[
-          { key: 'all',     label: 'All' },
-          { key: 'pending', label: `Pending${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
-          { key: 'paid',    label: 'Paid' }
-        ].map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            style={{
-              padding: '7px 18px', borderRadius: '50px', border: 'none',
-              cursor: 'pointer', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap',
-              background: filter === key ? '#f26522' : '#f4f7fe',
-              color:      filter === key ? '#fff'    : '#64748b',
-              transition: 'all 0.2s'
-            }}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Two Tabs: Pending Collection | Collected */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+        <button
+          onClick={() => setActiveTab('pending')}
+          style={{
+            padding: '8px 20px', borderRadius: '8px', border: 'none',
+            cursor: 'pointer', fontWeight: '700', fontSize: '14px',
+            background: activeTab === 'pending' ? '#f26522' : '#f1f5f9',
+            color:      activeTab === 'pending' ? '#fff'    : '#64748b',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <span>Pending Collection</span>
+          {totalPending > 0 && (
+            <span style={{
+              background: activeTab === 'pending' ? 'rgba(255,255,255,0.3)' : '#ea580c',
+              color: '#fff', borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: '800'
+            }}>
+              {totalPending}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('collected')}
+          style={{
+            padding: '8px 20px', borderRadius: '8px', border: 'none',
+            cursor: 'pointer', fontWeight: '700', fontSize: '14px',
+            background: activeTab === 'collected' ? '#16a34a' : '#f1f5f9',
+            color:      activeTab === 'collected' ? '#fff'    : '#64748b',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <span>Collected</span>
+          {totalPaid > 0 && (
+            <span style={{
+              background: activeTab === 'collected' ? 'rgba(255,255,255,0.3)' : '#16a34a',
+              color: '#fff', borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: '800'
+            }}>
+              {totalPaid}
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Table */}
-      <div className="table-scroll">
-        <table className="v-table">
-          <thead>
-            <tr>
-              <th>Customer Name</th>
-              <th className="hide-mobile">Phone</th>
-              <th>Plan</th>
-              <th>Start Date</th>
-              <th>Amount</th>
-              <th>Order Date</th>
-              <th>Status</th>
-              <th className="hide-mobile">Confirmed At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
+      {/* TAB 1: PENDING COLLECTION */}
+      {activeTab === 'pending' && (
+        <div className="table-scroll">
+          <table className="v-table">
+            <thead>
               <tr>
-                <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: '#a3aed0' }}>
-                  {emptyMsg}
-                </td>
+                <th>Customer Name</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Action</th>
               </tr>
-            ) : (
-              filtered.map((order) => {
-                const riderCollected = order.cashCollection?.collected === true;
-                const isPending  = order.paymentStatus === 'Pending' && !riderCollected;
-                const isMarking  = markingPaid.has(order.orderId);
-                const collectedByRider = riderCollected &&
-                  order.cashPaymentConfirmedByType === 'DeliveryPartner';
-                const collectedAmount = riderCollected
-                  ? Number(order.cashCollection.amount)
-                  : Number(order.amount);
-                const collectedAt = order.cashCollection?.collectedAt ||
-                  order.cashPaymentConfirmedAt;
-                return (
-                  <tr key={order.orderId}>
-                    <td style={{ fontWeight: '700', color: '#2b3674' }}>{order.customerName}</td>
-                    <td className="hide-mobile" style={{ color: '#64748b' }}>{order.customerPhone}</td>
-                    <td>{planBadge(order.planType)}</td>
-                    <td style={{ color: '#64748b', fontSize: '13px' }}>{fmt(order.startDate)}</td>
-                    <td style={{ fontWeight: '700', color: isPending ? '#ea580c' : '#2b3674' }}>
-                      ₹{(Number.isFinite(collectedAmount) ? collectedAmount : 0).toLocaleString()}
-                      {riderCollected && order.cashCollection.amountMismatch && (
-                        <small style={{ display: 'block', color: '#b45309', fontWeight: 500 }}>
-                          Expected ₹{Number(order.cashCollection.expectedAmount || 0).toLocaleString()}
-                        </small>
-                      )}
-                    </td>
-                    <td style={{ color: '#64748b', fontSize: '13px' }}>{fmtDateTime(order.orderDate)}</td>
-                    <td>
-                      <span style={{
-                        padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700',
-                        background: isPending ? '#fff7ed' : '#dcfce7',
-                        color:      isPending ? '#ea580c' : '#16a34a'
-                      }}>
-                        {riderCollected ? 'Paid' : order.paymentStatus}
-                      </span>
-                        {riderCollected && (
-                        <small style={{ display: 'block', marginTop: 3, color: '#166534', fontWeight: 600 }}>
-                          (Collected by Rider)
-                        </small>
-                      )}
-                    </td>
-                    <td className="hide-mobile" style={{ color: '#64748b', fontSize: '13px' }}>
-                      {fmtDateTime(collectedAt)}
-                    </td>
-                    <td>
-                      {isPending ? (
-                        <button
-                          aria-label={`Mark payment as paid for ${order.customerName}`}
-                          disabled={isMarking}
-                          onClick={() => handleMarkPaid(order.orderId)}
-                          style={{
-                            background: isMarking ? '#86efac' : '#16a34a',
-                            color: 'white', border: 'none', borderRadius: '8px',
-                            padding: '8px 14px', cursor: isMarking ? 'not-allowed' : 'pointer',
-                            fontWeight: '700', fontSize: '13px', minWidth: '110px',
-                            transition: 'background 0.2s'
-                          }}
-                        >
-                          {isMarking ? 'Marking...' : 'Mark as Paid'}
-                        </button>
-                      ) : (
-                        <span style={{ color: '#16a34a', fontWeight: '700', fontSize: '13px' }}>
-                          {collectedByRider ? '✓ Collected by Rider' : '✓ Collected'}
+            </thead>
+            <tbody>
+              {pendingOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#a3aed0' }}>
+                    No pending cash payments 🎉
+                  </td>
+                </tr>
+              ) : (
+                pendingOrders.map((order) => {
+                  const isOffline = order.isOfflineOrder || order.isManualOrder || order.source === 'manual';
+                  const isMarking = markingPaid.has(order.orderId);
+                  const orderDateDisplay = fmt(order.startDate || order.orderDate);
+
+                  return (
+                    <tr key={order.orderId}>
+                      <td>
+                        <div style={{ fontWeight: '700', color: '#2b3674' }}>{order.customerName}</div>
+                        {order.customerPhone && (
+                          <small style={{ color: '#64748b', fontSize: '12px' }}>📱 {order.customerPhone}</small>
+                        )}
+                        {isOffline && (
+                          <span style={{
+                            display: 'inline-block', marginLeft: '6px', padding: '1px 6px',
+                            borderRadius: '4px', background: '#fef3c7', color: '#92400e',
+                            fontSize: '10px', fontWeight: '700'
+                          }}>
+                            OFFLINE
+                          </span>
+                        )}
+                      </td>
+                      <td>{planBadge(order.planType)}</td>
+                      <td style={{ fontWeight: '700', color: '#ea580c', fontSize: '14px' }}>
+                        ₹{Number(order.amount || 0).toLocaleString()}
+                      </td>
+                      <td style={{ color: '#64748b', fontSize: '13px' }}>
+                        {orderDateDisplay}
+                      </td>
+                      <td>
+                        {isOffline ? (
+                          <button
+                            aria-label={`Mark as Paid for ${order.customerName}`}
+                            disabled={isMarking}
+                            onClick={() => handleMarkPaid(order.orderId)}
+                            style={{
+                              background: isMarking ? '#86efac' : '#16a34a',
+                              color: 'white', border: 'none', borderRadius: '8px',
+                              padding: '8px 14px', cursor: isMarking ? 'not-allowed' : 'pointer',
+                              fontWeight: '700', fontSize: '13px', minWidth: '110px',
+                              boxShadow: '0 2px 4px rgba(22,163,74,0.2)'
+                            }}
+                          >
+                            {isMarking ? 'Marking...' : 'Mark as Paid'}
+                          </button>
+                        ) : (
+                          <div style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe',
+                            borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '600'
+                          }}>
+                            <span>🛵</span>
+                            <span>Rider will collect on delivery</span>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* TAB 2: COLLECTED */}
+      {activeTab === 'collected' && (
+        <div className="table-scroll">
+          <table className="v-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Collected by</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {collectedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#a3aed0' }}>
+                    No collected payments yet
+                  </td>
+                </tr>
+              ) : (
+                collectedOrders.map((order) => {
+                  const riderCollected = order.cashCollectedByRole === 'rider' ||
+                    order.cashPaymentConfirmedByType === 'DeliveryPartner' ||
+                    order.cashCollection?.collected === true;
+                  const collectorLabel = riderCollected ? 'Collected by Rider' : 'Collected by Vendor';
+
+                  const collectedDate = order.cashCollectedAt ||
+                    order.cashCollection?.collectedAt ||
+                    order.cashPaymentConfirmedAt ||
+                    order.orderDate;
+
+                  return (
+                    <tr key={order.orderId}>
+                      <td>
+                        <div style={{ fontWeight: '700', color: '#2b3674' }}>{order.customerName}</div>
+                        {order.customerPhone && (
+                          <small style={{ color: '#64748b', fontSize: '12px' }}>📱 {order.customerPhone}</small>
+                        )}
+                      </td>
+                      <td>{planBadge(order.planType)}</td>
+                      <td style={{ fontWeight: '700', color: '#16a34a', fontSize: '14px' }}>
+                        ₹{Number(order.amount || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                          padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700',
+                          background: riderCollected ? '#e0f2fe' : '#f0fdf4',
+                          color:      riderCollected ? '#0369a1' : '#15803d',
+                          border:     riderCollected ? '1px solid #bae6fd' : '1px solid #bbf7d0'
+                        }}>
+                          <span>{riderCollected ? '🛵' : '🏪'}</span>
+                          <span>{collectorLabel}</span>
                         </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                      </td>
+                      <td style={{ color: '#64748b', fontSize: '13px' }}>
+                        {fmtDateTime(collectedDate)}
+                      </td>
+                      <td>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700',
+                          background: '#dcfce7', color: '#16a34a'
+                        }}>
+                          PAID ✅
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Responsive styles */}
       <style>{`
@@ -297,3 +390,4 @@ const CashPayments = () => {
 };
 
 export default CashPayments;
+

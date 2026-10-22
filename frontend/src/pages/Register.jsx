@@ -54,6 +54,10 @@ export default function Register() {
   const [vendorLocationDetected, setVendorLocationDetected] = useState(false);
   const [isDetectingVendorLocation, setIsDetectingVendorLocation] = useState(false);
 
+  // Location permission & verification popup state
+  const [locationBlocked, setLocationBlocked] = useState(false);
+  const [locationVerification, setLocationVerification] = useState(null);
+
   // User address autocomplete state
   const [userSearchQuery,  setUserSearchQuery]  = useState('');
   const [userSuggestions,  setUserSuggestions]  = useState([]);
@@ -221,57 +225,80 @@ export default function Register() {
       return;
     }
 
+    setLocationBlocked(false);
     setIsDetectingLocation(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         const { latitude, longitude } = coords;
-        setDetectedLat(latitude);
-        setDetectedLng(longitude);
+        let flatNo = '', street = '', area = '', city = '', pincode = '', fullAddress = '';
+
         try {
-          const res = await fetch(
-            `/api/maps/geocode/reverse?lat=${latitude}&lng=${longitude}`
-          );
-          if (!res.ok) throw new Error('Reverse geocoding failed');
-          const data = await res.json();
-          const components = data.results?.[0]?.address_components || [];
-          const get = (...types) => components.find(c => types.some(t => c.types.includes(t)))?.long_name || '';
-          const flatNo  = get('street_number');
-          const street  = get('route', 'premise');
-          const city    = get('locality', 'administrative_area_level_2');
-          const area    = get('sublocality_level_1', 'sublocality', 'neighborhood') || city;
-          const pincode = get('postal_code');
-          if (!flatNo && !street && !area && !city && !pincode) throw new Error('No address components returned');
-          setFormData(prev => ({
-            ...prev,
-            flatHouseNo: flatNo || prev.flatHouseNo,
-            street:      street || prev.street,
-            area:        area   || prev.area,
-            city:        city   || prev.city,
-            pincode:     pincode || prev.pincode,
-          }));
-          setErrors(prev => {
-            const next = { ...prev };
-            delete next.area; delete next.city; delete next.pincode;
-            return next;
-          });
-          setUserLocationDetected(true);
-          const missingDetails = [];
-          if (!street) missingDetails.push('street/road');
-          if (!flatNo) missingDetails.push('flat/house number');
-          showToast(missingDetails.length
-            ? `Area, city and pincode filled. ${missingDetails.join(' and ')} were not available from map data; enter them manually.`
-            : 'Location detected and address fields filled. You can still edit them before submitting.',
-          missingDetails.length ? 'warning' : 'success');
-        } catch {
-          showToast('Could not fetch address. Fill manually.', 'warning');
+          const res = await fetch(`/api/maps/geocode/reverse?lat=${latitude}&lng=${longitude}`);
+          if (res.ok) {
+            const data = await res.json();
+            const firstResult = data.results?.[0];
+            if (firstResult) {
+              fullAddress = firstResult.formatted_address || '';
+              const components = firstResult.address_components || [];
+              const get = (...types) => components.find(c => types.some(t => c.types.includes(t)))?.long_name || '';
+              flatNo  = get('street_number');
+              street  = get('route', 'premise');
+              city    = get('locality', 'administrative_area_level_2');
+              area    = get('sublocality_level_1', 'sublocality', 'neighborhood') || city;
+              pincode = get('postal_code');
+            }
+          }
+        } catch (_) {}
+
+        // Fallback to Nominatim if details missing
+        if (!area || !city || !pincode) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`, {
+              headers: { 'User-Agent': 'MealSetu/1.0' }
+            });
+            if (nomRes.ok) {
+              const nomData = await nomRes.json();
+              const addr = nomData.address || {};
+              if (!fullAddress) fullAddress = nomData.display_name || '';
+              if (!flatNo) flatNo = addr.house_number || '';
+              if (!street) street = addr.road || '';
+              if (!area) area = addr.suburb || addr.neighbourhood || addr.residential || '';
+              if (!city) city = addr.city || addr.town || addr.village || addr.county || '';
+              if (!pincode) pincode = addr.postcode || '';
+            }
+          } catch (_) {}
         }
+
+        if (!area) area = city;
+        if (!fullAddress) {
+          fullAddress = [flatNo, street, area, city, pincode].filter(Boolean).join(', ');
+        }
+
         setIsDetectingLocation(false);
+
+        if (!area && !city && !pincode) {
+          showToast('Could not fetch address details. Please fill manually.', 'warning');
+          return;
+        }
+
+        // Open verification modal before populating fields
+        setLocationVerification({
+          role: 'user',
+          area,
+          city,
+          pincode,
+          fullAddress,
+          street,
+          flatNo,
+          lat: latitude,
+          lng: longitude,
+        });
       },
       () => {
-        showToast('Location access denied. Please fill address manually.', 'error');
+        setLocationBlocked(true);
         setIsDetectingLocation(false);
       },
-      { timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
@@ -282,59 +309,126 @@ export default function Register() {
       return;
     }
 
+    setLocationBlocked(false);
     setIsDetectingVendorLocation(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         const { latitude, longitude } = coords;
+        let shopNo = '', street = '', area = '', city = '', pincode = '', fullAddress = '';
+
         try {
-          const res = await fetch(
-            `/api/maps/geocode/reverse?lat=${latitude}&lng=${longitude}`
-          );
-          if (!res.ok) throw new Error('Reverse geocoding failed');
-          const data = await res.json();
-          const components = data.results?.[0]?.address_components || [];
-          const get = (...types) => components.find(c => types.some(t => c.types.includes(t)))?.long_name || '';
-          const shopNo  = get('street_number');
-          const street  = get('route', 'premise');
-          const city    = get('locality', 'administrative_area_level_2');
-          const area    = get('sublocality_level_1', 'sublocality', 'neighborhood') || city;
-          const pincode = get('postal_code');
-          if (!shopNo && !street && !area && !city && !pincode) throw new Error('No address components returned');
-          setFormData(prev => ({
-            ...prev,
-            kitchenShopNo: shopNo || prev.kitchenShopNo,
-            kitchenStreet: street || prev.kitchenStreet,
-            kitchenArea:   area   || prev.kitchenArea,
-            kitchenCity:   city   || prev.kitchenCity,
-            kitchenPincode: pincode || prev.kitchenPincode,
-            kitchenLat: latitude,
-            kitchenLng: longitude,
-          }));
-          setVendorLocationDetected(true);
-          setErrors(prev => {
-            const next = { ...prev };
-            delete next.kitchenStreet; delete next.kitchenArea;
-            delete next.kitchenCity;   delete next.kitchenPincode;
-            return next;
-          });
-          const missingDetails = [];
-          if (!street) missingDetails.push('street/road');
-          if (!shopNo) missingDetails.push('shop/building number');
-          showToast(missingDetails.length
-            ? `Kitchen area, city and pincode filled. ${missingDetails.join(' and ')} were not available from map data; enter them manually.`
-            : 'Kitchen location detected and address fields filled. You can still edit them before submitting.',
-          missingDetails.length ? 'warning' : 'success');
-        } catch {
-          showToast('Could not fetch address. Fill manually.', 'warning');
+          const res = await fetch(`/api/maps/geocode/reverse?lat=${latitude}&lng=${longitude}`);
+          if (res.ok) {
+            const data = await res.json();
+            const firstResult = data.results?.[0];
+            if (firstResult) {
+              fullAddress = firstResult.formatted_address || '';
+              const components = firstResult.address_components || [];
+              const get = (...types) => components.find(c => types.some(t => c.types.includes(t)))?.long_name || '';
+              shopNo  = get('street_number');
+              street  = get('route', 'premise');
+              city    = get('locality', 'administrative_area_level_2');
+              area    = get('sublocality_level_1', 'sublocality', 'neighborhood') || city;
+              pincode = get('postal_code');
+            }
+          }
+        } catch (_) {}
+
+        // Fallback to Nominatim if details missing
+        if (!area || !city || !pincode) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`, {
+              headers: { 'User-Agent': 'MealSetu/1.0' }
+            });
+            if (nomRes.ok) {
+              const nomData = await nomRes.json();
+              const addr = nomData.address || {};
+              if (!fullAddress) fullAddress = nomData.display_name || '';
+              if (!shopNo) shopNo = addr.house_number || '';
+              if (!street) street = addr.road || '';
+              if (!area) area = addr.suburb || addr.neighbourhood || addr.residential || '';
+              if (!city) city = addr.city || addr.town || addr.village || addr.county || '';
+              if (!pincode) pincode = addr.postcode || '';
+            }
+          } catch (_) {}
         }
+
+        if (!area) area = city;
+        if (!fullAddress) {
+          fullAddress = [shopNo, street, area, city, pincode].filter(Boolean).join(', ');
+        }
+
         setIsDetectingVendorLocation(false);
+
+        if (!area && !city && !pincode) {
+          showToast('Could not fetch address details. Please fill manually.', 'warning');
+          return;
+        }
+
+        // Open verification modal before populating fields
+        setLocationVerification({
+          role: 'vendor',
+          area,
+          city,
+          pincode,
+          fullAddress,
+          street,
+          shopNo,
+          lat: latitude,
+          lng: longitude,
+        });
       },
       () => {
-        showToast('Location access denied. Please fill address manually.', 'error');
+        setLocationBlocked(true);
         setIsDetectingVendorLocation(false);
       },
-      { timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleConfirmLocation = () => {
+    if (!locationVerification) return;
+    const { role: targetRole, area, city, pincode, street, flatNo, shopNo, lat, lng } = locationVerification;
+
+    if (targetRole === 'vendor') {
+      setFormData(prev => ({
+        ...prev,
+        kitchenShopNo: shopNo || prev.kitchenShopNo,
+        kitchenStreet: street || prev.kitchenStreet,
+        kitchenArea:   area   || prev.kitchenArea,
+        kitchenCity:   city   || prev.kitchenCity,
+        kitchenPincode: pincode || prev.kitchenPincode,
+        kitchenLat: lat,
+        kitchenLng: lng,
+      }));
+      setVendorLocationDetected(true);
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next.kitchenStreet; delete next.kitchenArea;
+        delete next.kitchenCity;   delete next.kitchenPincode;
+        return next;
+      });
+      showToast('Kitchen location confirmed and address fields filled! You can still edit them manually.', 'success');
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        flatHouseNo: flatNo || prev.flatHouseNo,
+        street:      street || prev.street,
+        area:        area   || prev.area,
+        city:        city   || prev.city,
+        pincode:     pincode || prev.pincode,
+      }));
+      setDetectedLat(lat);
+      setDetectedLng(lng);
+      setUserLocationDetected(true);
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next.area; delete next.city; delete next.pincode;
+        return next;
+      });
+      showToast('Delivery location confirmed and address fields filled! You can still edit them manually.', 'success');
+    }
+    setLocationVerification(null);
   };
 
   // Shared Google Places forward-search
@@ -715,6 +809,37 @@ return (
           {Object.keys(errors).length > 0 && (
             <div className="form-error-summary">
               Please fix the errors below before submitting.
+            </div>
+          )}
+
+          {/* Yellow Banner for blocked location */}
+          {locationBlocked && (
+            <div style={{
+              background: '#fef9c3',
+              border: '1px solid #fde047',
+              color: '#854d0e',
+              borderRadius: '10px',
+              padding: '12px 16px',
+              marginBottom: '16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontWeight: '600',
+              fontSize: '13px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>⚠️</span>
+                <span>Location blocked. Please enter pincode and address manually.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocationBlocked(false)}
+                style={{ background: 'transparent', border: 'none', color: '#854d0e', cursor: 'pointer', fontSize: '16px', padding: '0 4px', fontWeight: 'bold' }}
+                aria-label="Dismiss banner"
+              >
+                ✕
+              </button>
             </div>
           )}
 
@@ -1181,6 +1306,71 @@ return (
             >
               {otpLoading ? 'Verifying...' : 'Verify OTP'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Location Verification Modal */}
+      {locationVerification && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '440px', width: '100%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '24px' }}>📍</span>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#1a1a2e' }}>
+                Confirm Your Location
+              </h3>
+            </div>
+            <div style={{
+              background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
+              padding: '14px', marginBottom: '20px', fontSize: '13px', lineHeight: '1.6'
+            }}>
+              <div style={{ display: 'flex', marginBottom: '6px' }}>
+                <strong style={{ width: '80px', color: '#64748b' }}>Area:</strong>
+                <span style={{ fontWeight: '600', color: '#1a1a2e' }}>{locationVerification.area || '—'}</span>
+              </div>
+              <div style={{ display: 'flex', marginBottom: '6px' }}>
+                <strong style={{ width: '80px', color: '#64748b' }}>City:</strong>
+                <span style={{ fontWeight: '600', color: '#1a1a2e' }}>{locationVerification.city || '—'}</span>
+              </div>
+              <div style={{ display: 'flex', marginBottom: '6px' }}>
+                <strong style={{ width: '80px', color: '#64748b' }}>Pincode:</strong>
+                <span style={{ fontWeight: '600', color: '#1a1a2e' }}>{locationVerification.pincode || '—'}</span>
+              </div>
+              <div style={{ display: 'flex' }}>
+                <strong style={{ width: '80px', color: '#64748b' }}>Full:</strong>
+                <span style={{ fontWeight: '600', color: '#1a1a2e', wordBreak: 'break-word' }}>
+                  {locationVerification.fullAddress || '—'}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setLocationVerification(null)}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #cbd5e1',
+                  background: '#fff', color: '#475569', fontWeight: '600', fontSize: '13px', cursor: 'pointer'
+                }}
+              >
+                ✏️ Edit Manually
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLocation}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: '8px', border: 'none',
+                  background: '#f26522', color: '#fff', fontWeight: '700', fontSize: '13px', cursor: 'pointer'
+                }}
+              >
+                ✅ Confirm & Use This
+              </button>
+            </div>
           </div>
         </div>
       )}
